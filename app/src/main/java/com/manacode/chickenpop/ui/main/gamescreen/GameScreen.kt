@@ -11,25 +11,27 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +61,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.manacode.chickenpop.audio.rememberAudioController
 import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
-import com.manacode.chickenpop.ui.main.component.SecondaryIconButton
 import com.manacode.chickenpop.ui.main.gamescreen.GameViewModel.TapOutcome
 import com.manacode.chickenpop.ui.main.gamescreen.overlay.GameSettingsOverlay
 import com.manacode.chickenpop.ui.main.gamescreen.overlay.WinOverlay
@@ -124,8 +125,8 @@ fun GameScreen(
                     timeSeconds = state.remainingSeconds,
                     score = state.score,
                     combo = state.combo,
-                    speed = state.speedLevel,
-                    onPause = viewModel::openPause
+                    onPause = viewModel::openPause,
+                    speed = state.speedLevel
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -179,107 +180,141 @@ private fun TopHud(
     timeSeconds: Int,
     score: Int,
     combo: Int,
-    speed: Int,
     onPause: () -> Unit,
+    speed: Int,
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        InfoBadge(
-            title = "Time",
-            value = String.format("%02d", timeSeconds.coerceAtLeast(0)),
-            colors = listOf(Color(0xFF6CD4FF), Color(0xFF2E9CC9))
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        AnimatedVisibility(visible = combo >= 2, enter = fadeIn(), exit = fadeOut()) {
-            ComboBadge(combo = combo)
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        if (speed > 0) {
-            AnimatedVisibility(visible = true) {
-                SpeedBadge(level = speed)
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-        }
-
-        InfoBadge(
-            title = "Score",
-            value = score.toString(),
-            colors = listOf(Color(0xFFFFE68D), Color(0xFFF5A623))
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        SecondaryIconButton(
-            onClick = onPause,
-            modifier = Modifier.size(56.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Pause,
-                contentDescription = "Pause",
-                tint = Color.White,
-                modifier = Modifier.fillMaxSize(0.7f)
+            ScoreBoard(
+                score = score,
+                timeSeconds = timeSeconds,
+                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            MenuButton(onPause = onPause)
+        }
+
+        val showBottomRow = combo >= 2 || speed > 0
+        if (showBottomRow) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AnimatedVisibility(visible = combo >= 2, enter = fadeIn(), exit = fadeOut()) {
+                    ComboPlank(combo = combo)
+                }
+
+                AnimatedVisibility(visible = speed > 0, enter = fadeIn(), exit = fadeOut()) {
+                    SpeedBadge(level = speed)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScoreBoard(score: Int, timeSeconds: Int, modifier: Modifier = Modifier) {
+    val timeFormatted = run {
+        val safeSeconds = timeSeconds.coerceAtLeast(0)
+        val minutes = safeSeconds / 60
+        val seconds = safeSeconds % 60
+        String.format("%d:%02d", minutes, seconds)
+    }
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(26.dp))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFFAA652D), Color(0xFF6B3C16))
+                )
+            )
+            .border(2.dp, Color(0xFF3E1D0A), RoundedCornerShape(26.dp))
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Score: ${score.toString().padStart(4, '0')}",
+                color = Color(0xFFFFF3D9),
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Black
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Time: $timeFormatted",
+                color = Color(0xFFFFF3D9),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
 }
 
 @Composable
-private fun InfoBadge(title: String, value: String, colors: List<Color>) {
-    Column(
+private fun MenuButton(onPause: () -> Unit) {
+    val shape = RoundedCornerShape(18.dp)
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val gradient = if (pressed) {
+        Brush.verticalGradient(listOf(Color(0xFFE8952D), Color(0xFF8C3C08)))
+    } else {
+        Brush.verticalGradient(listOf(Color(0xFFFFD27F), Color(0xFFDA7F21)))
+    }
+
+    Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Brush.verticalGradient(colors))
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .shadow(18.dp, shape, spotColor = Color(0x8043210C), clip = false)
+            .clip(shape)
+            .background(gradient)
+            .border(2.dp, Color(0xFF5A2A09), shape)
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                onClick = onPause
+            )
+            .padding(horizontal = 22.dp, vertical = 12.dp)
+            .widthIn(min = 96.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-            text = title,
-            color = Color.White.copy(alpha = 0.85f),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium
-        )
-        Text(
-            text = value,
+            text = "MENU",
             color = Color.White,
             fontSize = 20.sp,
-            fontWeight = FontWeight.Black
+            fontWeight = FontWeight.ExtraBold
         )
     }
 }
 
 @Composable
-private fun ComboBadge(combo: Int) {
-    val glow by animateFloatAsState(
-        targetValue = if (combo > 0) 1.15f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 420, easing = { it }),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "combo_glow"
-    )
+private fun ComboPlank(combo: Int) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(18.dp))
-            .background(Brush.horizontalGradient(listOf(Color(0xFFFF9A9E), Color(0xFFFECF4F))))
-            .graphicsLayer { scaleX = glow; scaleY = glow }
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .shadow(12.dp, RoundedCornerShape(18.dp), clip = false),
-        contentAlignment = Alignment.Center
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFFFFC56C), Color(0xFFB45B1F))
+                )
+            )
+            .border(2.dp, Color(0xFF4F250C), RoundedCornerShape(18.dp))
+            .padding(horizontal = 18.dp, vertical = 8.dp)
     ) {
         Text(
             text = "Combo x$combo",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Black,
-            modifier = Modifier.align(Alignment.Center)
+            color = Color(0xFF3E1F0A),
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 18.sp
         )
     }
 }
@@ -296,17 +331,18 @@ private fun SpeedBadge(level: Int) {
     )
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Brush.horizontalGradient(listOf(Color(0xFFB3FFAB), Color(0xFF65C764))))
-            .graphicsLayer { scaleX = 0.95f + oscillate * 0.05f; scaleY = 0.95f + oscillate * 0.05f }
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .clip(RoundedCornerShape(18.dp))
+            .background(Brush.verticalGradient(listOf(Color(0xFFBFFFA8), Color(0xFF5FB93A))))
+            .graphicsLayer { scaleX = 0.94f + oscillate * 0.06f; scaleY = 0.94f + oscillate * 0.06f }
+            .border(2.dp, Color(0xFF2D5E1A), RoundedCornerShape(18.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "Speed ${level + 1}",
-            color = Color(0xFF12451F),
+            color = Color(0xFF14440F),
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp
+            fontSize = 16.sp
         )
     }
 }
@@ -320,28 +356,74 @@ private fun GameBoard(
     onEffectConsumed: (CellEffect) -> Unit,
 ) {
     val chickenBySlot = remember(chickens) { chickens.associateBy { it.slotIndex } }
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(bottom = 16.dp)
     ) {
-        repeat(4) { rowIndex ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                repeat(3) { columnIndex ->
-                    val slot = rowIndex * 3 + columnIndex
-                    val chicken = chickenBySlot[slot]
-                    val effect = effects.firstOrNull { it.slot == slot }
-                    ChickenCell(
-                        chicken = chicken,
-                        combo = combo,
-                        effect = effect,
-                        onTap = { onTapSlot(slot) },
-                        onEffectConsumed = onEffectConsumed
+        val columns = 3
+        val rows = 4
+        val spacing = 12.dp
+        val framePadding = 36.dp
+        val innerWidth = remember(maxWidth) {
+            val width = maxWidth - framePadding
+            if (width < 0.dp) 0.dp else width
+        }
+        val cellSize = remember(innerWidth) {
+            val totalSpacing = spacing * (columns - 1)
+            val available = innerWidth - totalSpacing
+            val safeWidth = if (available < 0.dp) 0.dp else available
+            safeWidth / columns
+        }
+        val boardHeight = remember(cellSize) { cellSize * rows + spacing * (rows - 1) }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(32.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF6BC54A), Color(0xFF3E8A28))
                     )
+                )
+                .border(4.dp, Color(0xFF215016), RoundedCornerShape(32.dp))
+                .padding(18.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(boardHeight + 24.dp)
+                    .align(Alignment.Center)
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFFECFBD2), Color(0xFFC6EA8F))
+                        )
+                    )
+                    .border(3.dp, Color(0xFF3F6E1E), RoundedCornerShape(26.dp))
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(spacing)
+            ) {
+                repeat(rows) { rowIndex ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(spacing)
+                    ) {
+                        repeat(columns) { columnIndex ->
+                            val slot = rowIndex * columns + columnIndex
+                            val chicken = chickenBySlot[slot]
+                            val effect = effects.firstOrNull { it.slot == slot }
+                            ChickenCell(
+                                chicken = chicken,
+                                combo = combo,
+                                effect = effect,
+                                onTap = { onTapSlot(slot) },
+                                onEffectConsumed = onEffectConsumed,
+                                modifier = Modifier.size(cellSize)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -357,11 +439,15 @@ private fun ChickenCell(
     onEffectConsumed: (CellEffect) -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .weight(1f)
-            .aspectRatio(0.9f)
+        modifier = modifier
             .clip(RoundedCornerShape(22.dp))
-            .background(Color(0xFFFFECD1))
+            .shadow(12.dp, RoundedCornerShape(22.dp), clip = false, ambientColor = Color(0x66331F05), spotColor = Color(0x55331F05))
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFFFFF3D7), Color(0xFFFFD7A3))
+                )
+            )
+            .border(3.dp, Color(0xFF7C4815), RoundedCornerShape(22.dp))
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { onTap() })
             }
@@ -423,37 +509,83 @@ private fun EffectOverlay(effect: CellEffect, onEffectConsumed: (CellEffect) -> 
 @Composable
 private fun FarmSlotDecor() {
     Canvas(modifier = Modifier.fillMaxSize()) {
+        val borderColor = Color(0xFF4F2A0F)
+        drawRoundRect(
+            color = borderColor,
+            size = size,
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.08f),
+            style = Stroke(width = size.minDimension * 0.04f)
+        )
+
         val roofPath = Path().apply {
-            moveTo(size.width * 0.5f, size.height * 0.08f)
-            lineTo(size.width * 0.1f, size.height * 0.32f)
-            lineTo(size.width * 0.9f, size.height * 0.32f)
+            moveTo(size.width * 0.5f, size.height * 0.12f)
+            lineTo(size.width * 0.1f, size.height * 0.36f)
+            lineTo(size.width * 0.9f, size.height * 0.36f)
             close()
         }
-        drawPath(roofPath, color = Color(0xFFCA4536))
-
-        drawRect(
-            color = Color(0xFFFFF6E8),
-            topLeft = Offset(size.width * 0.12f, size.height * 0.32f),
-            size = Size(size.width * 0.76f, size.height * 0.48f)
+        drawPath(
+            path = roofPath,
+            brush = Brush.verticalGradient(listOf(Color(0xFFD24731), Color(0xFF781B11)))
         )
 
         drawRect(
-            color = Color(0xFF8D5C2E),
-            topLeft = Offset(size.width * 0.42f, size.height * 0.52f),
-            size = Size(size.width * 0.16f, size.height * 0.28f)
+            color = Color(0xFFFCEFDA),
+            topLeft = Offset(size.width * 0.18f, size.height * 0.36f),
+            size = Size(size.width * 0.64f, size.height * 0.38f)
+        )
+
+        val plankColor = Color(0xFFE7B676)
+        repeat(3) { index ->
+            val y = size.height * (0.38f + index * 0.12f)
+            drawRect(
+                color = plankColor.copy(alpha = 0.7f),
+                topLeft = Offset(size.width * 0.18f, y),
+                size = Size(size.width * 0.64f, size.height * 0.04f)
+            )
+        }
+
+        drawRect(
+            color = Color(0xFF6F4215),
+            topLeft = Offset(size.width * 0.44f, size.height * 0.54f),
+            size = Size(size.width * 0.12f, size.height * 0.20f)
+        )
+
+        val windowColor = Color(0xFF87B6FF)
+        drawRoundRect(
+            color = windowColor,
+            topLeft = Offset(size.width * 0.24f, size.height * 0.44f),
+            size = Size(size.width * 0.14f, size.height * 0.12f),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.02f)
+        )
+        drawRoundRect(
+            color = windowColor,
+            topLeft = Offset(size.width * 0.62f, size.height * 0.44f),
+            size = Size(size.width * 0.14f, size.height * 0.12f),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.02f)
         )
 
         drawRoundRect(
             color = Color(0xFF4CAF50),
-            topLeft = Offset(size.width * 0.08f, size.height * 0.78f),
-            size = Size(size.width * 0.84f, size.height * 0.16f),
+            topLeft = Offset(size.width * 0.1f, size.height * 0.76f),
+            size = Size(size.width * 0.8f, size.height * 0.16f),
             cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.height * 0.08f)
+        )
+
+        drawCircle(
+            color = Color(0xFF3E8A28),
+            radius = size.width * 0.08f,
+            center = Offset(size.width * 0.28f, size.height * 0.86f)
+        )
+        drawCircle(
+            color = Color(0xFF3E8A28),
+            radius = size.width * 0.06f,
+            center = Offset(size.width * 0.7f, size.height * 0.84f)
         )
     }
 }
 
 @Composable
-private fun ChickenSprite(speedLevel: Int, combo: Int) {
+fun ChickenSprite(speedLevel: Int, combo: Int) {
     val pulse by animateFloatAsState(
         targetValue = if (combo >= 3) 1.08f else 1f,
         animationSpec = infiniteRepeatable(
@@ -469,10 +601,10 @@ private fun ChickenSprite(speedLevel: Int, combo: Int) {
             .shadow(10.dp, CircleShape, clip = false)
             .graphicsLayer { scaleX = pulse; scaleY = pulse }
             .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.85f)),
+            .background(Color.White.copy(alpha = 0.9f)),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.fillMaxSize(0.85f)) {
+        Canvas(modifier = Modifier.fillMaxSize(0.88f)) {
             val baseColor = Color(0xFFFFF7E0)
             val outline = Color(0xFF6D3A16)
             val comb = Color(0xFFE53935)
@@ -521,26 +653,45 @@ private fun ChickenSprite(speedLevel: Int, combo: Int) {
 @Composable
 private fun GameBackground() {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        drawRect(Brush.verticalGradient(listOf(Color(0xFF87CEEB), Color(0xFF87CEEB), Color(0xFFBDF29A))), size = size)
+        drawRect(
+            Brush.verticalGradient(
+                listOf(Color(0xFF6EC9FF), Color(0xFF9EE8FF), Color(0xFFF2FFB7))
+            ),
+            size = size
+        )
 
-        val hills = Path().apply {
+        val sunCenter = Offset(size.width * 0.82f, size.height * 0.22f)
+        drawCircle(Color(0xFFFFF59D), radius = size.minDimension * 0.1f, center = sunCenter)
+        drawCircle(Color(0x80FFF59D), radius = size.minDimension * 0.18f, center = sunCenter)
+
+        val distantHill = Path().apply {
             moveTo(-size.width * 0.2f, size.height * 0.65f)
-            quadraticBezierTo(size.width * 0.2f, size.height * 0.48f, size.width * 0.5f, size.height * 0.58f)
-            quadraticBezierTo(size.width * 0.85f, size.height * 0.75f, size.width * 1.2f, size.height * 0.6f)
+            quadraticBezierTo(size.width * 0.3f, size.height * 0.45f, size.width * 0.65f, size.height * 0.62f)
+            quadraticBezierTo(size.width * 1.05f, size.height * 0.52f, size.width * 1.2f, size.height * 0.68f)
             lineTo(size.width * 1.2f, size.height)
             lineTo(-size.width * 0.2f, size.height)
             close()
         }
-        drawPath(hills, brush = Brush.verticalGradient(listOf(Color(0xFF8BC34A), Color(0xFF558B2F))))
+        drawPath(distantHill, brush = Brush.verticalGradient(listOf(Color(0xFF70C46A), Color(0xFF3E8A28))))
 
-        val ground = Path().apply {
-            moveTo(-size.width * 0.1f, size.height * 0.82f)
-            quadraticBezierTo(size.width * 0.3f, size.height * 0.88f, size.width * 0.6f, size.height * 0.8f)
-            quadraticBezierTo(size.width * 0.9f, size.height * 0.74f, size.width * 1.1f, size.height * 0.86f)
+        val foreground = Path().apply {
+            moveTo(-size.width * 0.1f, size.height * 0.85f)
+            quadraticBezierTo(size.width * 0.25f, size.height * 0.78f, size.width * 0.5f, size.height * 0.86f)
+            quadraticBezierTo(size.width * 0.85f, size.height * 0.94f, size.width * 1.1f, size.height * 0.82f)
             lineTo(size.width * 1.1f, size.height)
             lineTo(-size.width * 0.1f, size.height)
             close()
         }
-        drawPath(ground, brush = Brush.verticalGradient(listOf(Color(0xFFFFD180), Color(0xFFFFAB40))))
+        drawPath(foreground, brush = Brush.verticalGradient(listOf(Color(0xFF8BC34A), Color(0xFF4CAF50))))
+
+        repeat(5) { index ->
+            val startX = size.width * (0.05f + index * 0.2f)
+            drawLine(
+                color = Color(0x33FFFFFF),
+                start = Offset(startX, size.height * 0.18f + index * 6f),
+                end = Offset(startX + size.width * 0.08f, size.height * 0.2f + index * 6f),
+                strokeWidth = size.minDimension * 0.003f
+            )
+        }
     }
 }
