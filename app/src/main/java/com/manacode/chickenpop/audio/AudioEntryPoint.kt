@@ -1,4 +1,4 @@
-package com.manacode.feedthechick.audio
+package com.manacode.chickenpop.audio
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

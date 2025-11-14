@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.manacode.feedthechick.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -42,11 +41,7 @@ fun GradientOutlinedText(
     val density = LocalDensity.current
     val textSizePx = with(density) { fontSize.toPx() }
 
-    val typeface = remember {
-        androidx.core.content.res.ResourcesCompat.getFont(
-            context, R.font.poppins_extra_bold
-        ) ?: android.graphics.Typeface.DEFAULT_BOLD
-    }
+    val typeface = remember { android.graphics.Typeface.DEFAULT_BOLD }
 
     Canvas(
         modifier = modifier
@@ -98,11 +93,7 @@ fun GradientOutlinedTextShort(
     val textSizePx = with(density) { fontSize.toPx() }
     val padPx = with(density) { horizontalPadding.toPx() }
 
-    val typeface = remember {
-        androidx.core.content.res.ResourcesCompat.getFont(
-            context, R.font.poppins_extra_bold
-        ) ?: android.graphics.Typeface.DEFAULT_BOLD
-    }
+    val typeface = remember { android.graphics.Typeface.DEFAULT_BOLD }
 
     Canvas(
         modifier = modifier

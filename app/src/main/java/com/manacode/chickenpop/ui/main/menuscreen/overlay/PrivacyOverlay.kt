@@ -35,9 +35,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.manacode.feedthechick.ui.main.component.GradientOutlinedText
-import com.manacode.feedthechick.ui.main.component.OrangePrimaryButton
-import com.manacode.feedthechick.ui.main.component.SecondaryBackButton
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
+import com.manacode.chickenpop.ui.main.component.OrangePrimaryButton
+import com.manacode.chickenpop.ui.main.component.SecondaryBackButton
 
 @Composable
 fun PrivacyOverlay(

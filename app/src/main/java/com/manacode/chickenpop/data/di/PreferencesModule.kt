@@ -1,9 +1,9 @@
-package com.manacode.feedthechick.data.di
+package com.manacode.chickenpop.data.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.manacode.feedthechick.data.settings.SettingsRepository
-import com.manacode.feedthechick.data.settings.SettingsRepositoryImpl
+import com.manacode.chickenpop.data.settings.SettingsRepository
+import com.manacode.chickenpop.data.settings.SettingsRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

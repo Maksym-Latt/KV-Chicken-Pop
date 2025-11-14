@@ -1,4 +1,4 @@
-package com.manacode.feedthechick.data.settings
+package com.manacode.chickenpop.data.settings
 
 interface SettingsRepository {
     fun getMusicVolume(): Int
