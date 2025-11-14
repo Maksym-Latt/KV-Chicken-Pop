@@ -28,10 +28,13 @@ class GameViewModel : ViewModel() {
         val remainingFraction: Float get() = (remainingMillis.coerceAtLeast(0L) / TOTAL_TIME.toFloat()).coerceIn(0f, 1f)
     }
 
+    enum class ChickenPhase { Hidden, Peeking, Outside }
+
     data class Chicken(
         val id: Int,
         val slotIndex: Int,
-        val speedLevel: Int
+        val speedLevel: Int,
+        val phase: ChickenPhase
     )
 
     sealed class TapOutcome {
@@ -46,7 +49,23 @@ class GameViewModel : ViewModel() {
         val lifetime: Long,
         val speedLevel: Int
     ) {
-        fun toUi(): Chicken = Chicken(id = id, slotIndex = slotIndex, speedLevel = speedLevel)
+        fun toUi(): Chicken = Chicken(
+            id = id,
+            slotIndex = slotIndex,
+            speedLevel = speedLevel,
+            phase = phase()
+        )
+
+        fun phase(): ChickenPhase {
+            if (lifetime <= 0L) return ChickenPhase.Outside
+            val clampedRemaining = remaining.coerceAtLeast(0L)
+            val progress = (1f - clampedRemaining / lifetime.toFloat()).coerceIn(0f, 1f)
+            return when {
+                progress < 1f / 3f -> ChickenPhase.Hidden
+                progress < 2f / 3f -> ChickenPhase.Peeking
+                else -> ChickenPhase.Outside
+            }
+        }
     }
 
     companion object {
@@ -199,11 +218,24 @@ class GameViewModel : ViewModel() {
             return TapOutcome.Miss
         }
 
-        val chicken = activeChickens.removeAt(idx)
+        val chicken = activeChickens[idx]
+        if (chicken.phase() != ChickenPhase.Outside) {
+            combo = 0
+            _state.update {
+                it.copy(
+                    combo = 0,
+                    chickens = activeChickens.map { c -> c.toUi() }
+                )
+            }
+            return TapOutcome.Miss
+        }
+
+        activeChickens.removeAt(idx)
         combo += 1
         if (combo > bestCombo) bestCombo = combo
         if (combo % 5 == 0) speedLevel = (speedLevel + 1).coerceAtMost(10)
         val scoreGain = 100 + chicken.speedLevel * 15
+
         _state.update {
             it.copy(
                 score = it.score + scoreGain,
