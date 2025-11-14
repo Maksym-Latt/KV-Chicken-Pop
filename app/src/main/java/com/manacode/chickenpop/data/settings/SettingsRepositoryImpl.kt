@@ -1,4 +1,4 @@
-package com.manacode.feedthechick.data.settings
+package com.manacode.chickenpop.data.settings
 
 import android.content.SharedPreferences
 import javax.inject.Inject

@@ -1,22 +1,14 @@
 package com.manacode.chickenpop.ui.main.splashscreen
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import com.manacode.feedthechick.R
-import com.manacode.feedthechick.ui.main.component.GradientOutlinedText
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.sp
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
 import kotlinx.coroutines.delay
 
 @Composable

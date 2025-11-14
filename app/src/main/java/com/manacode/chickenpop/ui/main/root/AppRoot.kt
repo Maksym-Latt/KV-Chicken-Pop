@@ -14,12 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.manacode.feedthechick.audio.rememberAudioController
-import com.manacode.feedthechick.ui.main.gamescreen.GameScreen
-import com.manacode.feedthechick.ui.main.menuscreen.MainViewModel
-import com.manacode.feedthechick.ui.main.menuscreen.MenuScreen
-import com.manacode.feedthechick.ui.main.menuscreen.PrivacyOverlay
-import com.manacode.feedthechick.ui.main.menuscreen.SettingsOverlay
+import com.manacode.chickenpop.audio.rememberAudioController
+import com.manacode.chickenpop.ui.main.gamescreen.GameScreen
+import com.manacode.chickenpop.ui.main.menuscreen.MainViewModel
+import com.manacode.chickenpop.ui.main.menuscreen.MenuScreen
+import com.manacode.chickenpop.ui.main.menuscreen.overlay.PrivacyOverlay
+import com.manacode.chickenpop.ui.main.menuscreen.overlay.SettingsOverlay
 
 @Composable
 fun AppRoot(

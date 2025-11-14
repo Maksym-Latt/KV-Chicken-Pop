@@ -1,4 +1,4 @@
-package com.manacode.feedthechick.audio
+package com.manacode.chickenpop.audio
 
 import dagger.Binds
 import dagger.Module

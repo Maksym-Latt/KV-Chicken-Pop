@@ -14,7 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.manacode.feedthechick.MainActivity
+import com.manacode.chickenpop.MainActivity
 
 @AndroidEntryPoint
 class SplashActivity : ComponentActivity() {

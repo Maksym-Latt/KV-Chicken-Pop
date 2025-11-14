@@ -1,6 +1,5 @@
 package com.manacode.chickenpop.ui.main.gamescreen.overlay
 
-import android.R.attr.maxWidth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,9 +26,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.manacode.feedthechick.ui.main.component.GradientOutlinedText
-import com.manacode.feedthechick.ui.main.component.SecondaryBackButton
-import com.manacode.feedthechick.ui.main.component.StartPrimaryButton
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
+import com.manacode.chickenpop.ui.main.component.SecondaryBackButton
+import com.manacode.chickenpop.ui.main.component.StartPrimaryButton
 
 @Composable
 fun IntroOverlay(
@@ -79,12 +78,12 @@ fun IntroOverlay(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     GradientOutlinedText(
-                        text = "Feed the chick!",
+                        text = "Pop the chickens!",
                         fontSize = titleSize,
                         gradientColors = listOf(Color.White, Color.White)
                     )
                     Text(
-                        text = "Drag corn into its beak and don't let the chick eat stones or frogs.",
+                        text = "Tap the chickens before they hide. Chain hits to speed up and earn bonus points!",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = Color(0xFF704117),
                             textAlign = TextAlign.Center,
@@ -94,7 +93,7 @@ fun IntroOverlay(
                         modifier = Modifier.fillMaxWidth()
                     )
                     StartPrimaryButton(
-                        text = "Start",
+                        text = "Let's go",
                         onClick = onStart
                     )
                 }

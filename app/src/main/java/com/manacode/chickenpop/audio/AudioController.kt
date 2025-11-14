@@ -1,4 +1,4 @@
-package com.manacode.feedthechick.audio
+package com.manacode.chickenpop.audio
 
 interface AudioController {
     fun playMenuMusic()

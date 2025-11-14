@@ -8,22 +8,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -35,14 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.manacode.feedthechick.ui.main.component.GradientOutlinedText
-import com.manacode.feedthechick.ui.main.settings.SettingsViewModel
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
+import com.manacode.chickenpop.ui.main.settings.SettingsViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
-import com.manacode.feedthechick.ui.main.component.LabeledSlider
-import com.manacode.feedthechick.ui.main.component.SecondaryBackButton
-import com.manacode.feedthechick.ui.main.component.SecondaryIconButton
+import com.manacode.chickenpop.ui.main.component.LabeledSlider
+import com.manacode.chickenpop.ui.main.component.SecondaryBackButton
+import com.manacode.chickenpop.ui.main.component.SecondaryIconButton
 
 @Composable
 fun GameSettingsOverlay(

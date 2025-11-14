@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.manacode.feedthechick.ui.main.component.OrangePrimaryButton
+import com.manacode.chickenpop.ui.main.component.OrangePrimaryButton
 import kotlin.math.roundToInt
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,11 +30,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.manacode.feedthechick.ui.main.component.GradientOutlinedText
-import com.manacode.feedthechick.ui.main.component.GradientOutlinedTextShort
-import com.manacode.feedthechick.ui.main.component.LabeledSlider
-import com.manacode.feedthechick.ui.main.component.SecondaryBackButton
-import com.manacode.feedthechick.ui.main.settings.SettingsViewModel
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedTextShort
+import com.manacode.chickenpop.ui.main.component.LabeledSlider
+import com.manacode.chickenpop.ui.main.component.SecondaryBackButton
+import com.manacode.chickenpop.ui.main.settings.SettingsViewModel
 import kotlin.math.max
 
 @Composable

@@ -2,8 +2,8 @@ package com.manacode.chickenpop.ui.main.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.manacode.feedthechick.audio.AudioController
-import com.manacode.feedthechick.data.settings.SettingsRepository
+import com.manacode.chickenpop.audio.AudioController
+import com.manacode.chickenpop.data.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
