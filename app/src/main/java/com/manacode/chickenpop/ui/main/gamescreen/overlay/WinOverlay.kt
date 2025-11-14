@@ -3,7 +3,7 @@ package com.manacode.chickenpop.ui.main.gamescreen.overlay
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,19 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.manacode.chickenpop.ui.main.gamescreen.ChickenSprite
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.manacode.chickenpop.R
 
 @Composable
 fun WinOverlay(
@@ -126,77 +121,37 @@ private fun GameOverChicken() {
             .fillMaxWidth()
             .height(220.dp)
             .clip(stageShape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF78C850), Color(0xFF3F8A28))
-                )
-            )
-            .border(4.dp, Color(0xFF1F4F17), stageShape)
-            .padding(horizontal = 18.dp, vertical = 16.dp),
+            .background(Color(0xFF0F2536).copy(alpha = 0.92f))
+            .border(4.dp, Color(0xFF06121D), stageShape),
         contentAlignment = Alignment.BottomCenter
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val podiumHeight = size.height * 0.28f
-            val podiumTop = size.height - podiumHeight
-            val podiumPath = Path().apply {
-                moveTo(size.width * 0.1f, podiumTop)
-                quadraticBezierTo(size.width * 0.32f, podiumTop - podiumHeight * 0.35f, size.width * 0.5f, podiumTop)
-                quadraticBezierTo(size.width * 0.7f, podiumTop + podiumHeight * 0.25f, size.width * 0.9f, podiumTop)
-                lineTo(size.width * 0.9f, size.height)
-                lineTo(size.width * 0.1f, size.height)
-                close()
-            }
-            drawPath(
-                path = podiumPath,
-                brush = Brush.verticalGradient(
-                    listOf(Color(0xFFFFF0B2), Color(0xFFCD8A2D))
-                )
-            )
-            drawPath(
-                path = podiumPath,
-                color = Color(0xFF5C3B16),
-                style = Stroke(width = size.minDimension * 0.012f)
-            )
+        Image(
+            painter = painterResource(id = R.drawable.bg_game),
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.3f
+        )
 
-            drawCircle(
-                color = Color.White,
-                radius = size.width * 0.04f,
-                center = Offset(size.width * 0.24f, podiumTop - size.height * 0.12f)
-            )
-            drawCircle(
-                color = Color.White,
-                radius = size.width * 0.035f,
-                center = Offset(size.width * 0.68f, podiumTop - size.height * 0.09f)
-            )
-
-            repeat(3) { index ->
-                val centerX = size.width * (0.25f + index * 0.18f)
-                val centerY = size.height * 0.88f
-                repeat(6) { petal ->
-                    val angle = (PI * 2 / 6) * petal
-                    val offsetX = (size.width * 0.03f * cos(angle)).toFloat()
-                    val offsetY = (size.width * 0.03f * sin(angle)).toFloat()
-                    drawCircle(
-                        color = Color.White,
-                        radius = size.width * 0.012f,
-                        center = Offset(centerX + offsetX, centerY + offsetY)
-                    )
-                }
-                drawCircle(
-                    color = Color(0xFFFFD54F),
-                    radius = size.width * 0.01f,
-                    center = Offset(centerX, centerY)
-                )
-            }
-        }
-
-        Box(
+        Image(
+            painter = painterResource(id = R.drawable.tile_bg),
+            contentDescription = null,
             modifier = Modifier
-                .fillMaxWidth(0.55f)
-                .graphicsLayer { translationY = (-20).dp.toPx() }
-        ) {
-            ChickenSprite(speedLevel = 0, combo = 0)
-        }
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(72.dp),
+            contentScale = ContentScale.Crop,
+            alpha = 0.85f
+        )
+
+        Image(
+            painter = painterResource(id = R.drawable.chicken_happy),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth(0.6f),
+            contentScale = ContentScale.Fit
+        )
     }
 }
 

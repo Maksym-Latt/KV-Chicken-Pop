@@ -8,21 +8,21 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -52,15 +51,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import com.manacode.chickenpop.audio.rememberAudioController
+import com.manacode.chickenpop.R
 import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
 import com.manacode.chickenpop.ui.main.gamescreen.GameViewModel.TapOutcome
 import com.manacode.chickenpop.ui.main.gamescreen.overlay.GameSettingsOverlay
@@ -116,6 +116,7 @@ fun GameScreen(
     Surface(color = Color(0xFFFFF4D9)) {
         Box(modifier = Modifier.fillMaxSize()) {
             GameBackground()
+            BackgroundClouds()
 
             Column(
                 modifier = Modifier
@@ -134,7 +135,6 @@ fun GameScreen(
 
                 GameBoard(
                     chickens = state.chickens,
-                    combo = state.combo,
                     effects = effects,
                     onTapSlot = { slot ->
                         when (val outcome = viewModel.tap(slot)) {
@@ -147,7 +147,11 @@ fun GameScreen(
                     },
                     onEffectConsumed = { effect -> effects.remove(effect) }
                 )
+
+                Spacer(modifier = Modifier.height(96.dp))
             }
+
+            GameForegroundChicken()
 
             if (state.showPause) {
                 GameSettingsOverlay(
@@ -351,7 +355,6 @@ private fun SpeedBadge(level: Int) {
 @Composable
 private fun GameBoard(
     chickens: List<GameViewModel.Chicken>,
-    combo: Int,
     effects: List<CellEffect>,
     onTapSlot: (Int) -> Unit,
     onEffectConsumed: (CellEffect) -> Unit,
@@ -360,50 +363,25 @@ private fun GameBoard(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(horizontal = 8.dp)
     ) {
         val columns = 3
         val rows = 4
-        val spacing = 12.dp
-        val framePadding = 36.dp
-        val innerWidth = remember(maxWidth) {
-            val width = maxWidth - framePadding
-            if (width < 0.dp) 0.dp else width
-        }
-        val cellSize = remember(innerWidth) {
+        val spacing = 16.dp
+        val cellSize = remember(maxWidth) {
             val totalSpacing = spacing * (columns - 1)
-            val available = innerWidth - totalSpacing
+            val available = maxWidth - totalSpacing
             val safeWidth = if (available < 0.dp) 0.dp else available
             safeWidth / columns
         }
-        val boardHeight = remember(cellSize) { cellSize * rows + spacing * (rows - 1) }
+        val boardWidth = remember(cellSize) { cellSize * columns + spacing * (columns - 1) }
 
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF6BC54A), Color(0xFF3E8A28))
-                    )
-                )
-                .border(4.dp, Color(0xFF215016), RoundedCornerShape(32.dp))
-                .padding(18.dp)
+                .width(boardWidth)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(boardHeight + 24.dp)
-                    .align(Alignment.Center)
-                    .clip(RoundedCornerShape(26.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color(0xFFECFBD2), Color(0xFFC6EA8F))
-                        )
-                    )
-                    .border(3.dp, Color(0xFF3F6E1E), RoundedCornerShape(26.dp))
-                    .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(spacing)
             ) {
                 repeat(rows) { rowIndex ->
@@ -417,7 +395,6 @@ private fun GameBoard(
                             val effect = effects.firstOrNull { it.slot == slot }
                             ChickenCell(
                                 chicken = chicken,
-                                combo = combo,
                                 effect = effect,
                                 onTap = { onTapSlot(slot) },
                                 onEffectConsumed = onEffectConsumed,
@@ -434,36 +411,43 @@ private fun GameBoard(
 @Composable
 private fun ChickenCell(
     chicken: GameViewModel.Chicken?,
-    combo: Int,
     effect: CellEffect?,
     onTap: () -> Unit,
     onEffectConsumed: (CellEffect) -> Unit,
     modifier: Modifier
 ) {
+    val shape = RoundedCornerShape(20.dp)
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(22.dp))
-            .shadow(12.dp, RoundedCornerShape(22.dp), clip = false, ambientColor = Color(0x66331F05), spotColor = Color(0x55331F05))
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFFFF3D7), Color(0xFFFFD7A3))
-                )
-            )
-            .border(3.dp, Color(0xFF7C4815), RoundedCornerShape(22.dp))
+            .shadow(12.dp, shape, clip = false, ambientColor = Color(0x33231105), spotColor = Color(0x33231105))
+            .clip(shape)
+            .background(Color.Transparent)
             .pointerInput(Unit) {
                 detectTapGestures(onTap = { onTap() })
             }
-            .padding(8.dp),
-        contentAlignment = Alignment.BottomCenter
     ) {
-        FarmSlotDecor()
+        Image(
+            painter = painterResource(id = R.drawable.tile_bg),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
-        AnimatedVisibility(
-            visible = chicken != null,
-            enter = scaleIn(animationSpec = tween(160)) + fadeIn(tween(160)),
-            exit = fadeOut(tween(120))
-        ) {
-            ChickenSprite(speedLevel = chicken?.speedLevel ?: 0, combo = combo)
+        val stateRes = remember(chicken) {
+            when (chicken?.phase) {
+                GameViewModel.ChickenPhase.Peeking -> R.drawable.tile_house_with_chicken
+                GameViewModel.ChickenPhase.Outside -> R.drawable.tile_house_outside_chicken
+                else -> R.drawable.tile_house
+            }
+        }
+
+        Crossfade(targetState = stateRes, modifier = Modifier.fillMaxSize(), label = "chicken_state") { resId ->
+            Image(
+                painter = painterResource(id = resId),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
         }
 
         if (effect != null) {
@@ -508,192 +492,62 @@ private fun EffectOverlay(effect: CellEffect, onEffectConsumed: (CellEffect) -> 
     }
 }
 
-@Composable
-private fun FarmSlotDecor() {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val borderColor = Color(0xFF4F2A0F)
-        drawRoundRect(
-            color = borderColor,
-            size = size,
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.08f),
-            style = Stroke(width = size.minDimension * 0.04f)
-        )
-
-        val roofPath = Path().apply {
-            moveTo(size.width * 0.5f, size.height * 0.12f)
-            lineTo(size.width * 0.1f, size.height * 0.36f)
-            lineTo(size.width * 0.9f, size.height * 0.36f)
-            close()
-        }
-        drawPath(
-            path = roofPath,
-            brush = Brush.verticalGradient(listOf(Color(0xFFD24731), Color(0xFF781B11)))
-        )
-
-        drawRect(
-            color = Color(0xFFFCEFDA),
-            topLeft = Offset(size.width * 0.18f, size.height * 0.36f),
-            size = Size(size.width * 0.64f, size.height * 0.38f)
-        )
-
-        val plankColor = Color(0xFFE7B676)
-        repeat(3) { index ->
-            val y = size.height * (0.38f + index * 0.12f)
-            drawRect(
-                color = plankColor.copy(alpha = 0.7f),
-                topLeft = Offset(size.width * 0.18f, y),
-                size = Size(size.width * 0.64f, size.height * 0.04f)
-            )
-        }
-
-        drawRect(
-            color = Color(0xFF6F4215),
-            topLeft = Offset(size.width * 0.44f, size.height * 0.54f),
-            size = Size(size.width * 0.12f, size.height * 0.20f)
-        )
-
-        val windowColor = Color(0xFF87B6FF)
-        drawRoundRect(
-            color = windowColor,
-            topLeft = Offset(size.width * 0.24f, size.height * 0.44f),
-            size = Size(size.width * 0.14f, size.height * 0.12f),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.02f)
-        )
-        drawRoundRect(
-            color = windowColor,
-            topLeft = Offset(size.width * 0.62f, size.height * 0.44f),
-            size = Size(size.width * 0.14f, size.height * 0.12f),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.minDimension * 0.02f)
-        )
-
-        drawRoundRect(
-            color = Color(0xFF4CAF50),
-            topLeft = Offset(size.width * 0.1f, size.height * 0.76f),
-            size = Size(size.width * 0.8f, size.height * 0.16f),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.height * 0.08f)
-        )
-
-        drawCircle(
-            color = Color(0xFF3E8A28),
-            radius = size.width * 0.08f,
-            center = Offset(size.width * 0.28f, size.height * 0.86f)
-        )
-        drawCircle(
-            color = Color(0xFF3E8A28),
-            radius = size.width * 0.06f,
-            center = Offset(size.width * 0.7f, size.height * 0.84f)
-        )
-    }
-}
-
-@Composable
-fun ChickenSprite(speedLevel: Int, combo: Int) {
-    val pulse by animateFloatAsState(
-        targetValue = if (combo >= 3) 1.08f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(420, easing = { it }),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "chicken_pulse"
-    )
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(0.8f)
-            .aspectRatio(1f)
-            .shadow(10.dp, CircleShape, clip = false)
-            .graphicsLayer { scaleX = pulse; scaleY = pulse }
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.9f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize(0.88f)) {
-            val baseColor = Color(0xFFFFF7E0)
-            val outline = Color(0xFF6D3A16)
-            val comb = Color(0xFFE53935)
-            val beak = Color(0xFFFFB74D)
-
-            val bodyScale = if (combo >= 3) 1.05f else 1f
-
-            drawOval(
-                color = baseColor,
-                topLeft = Offset(size.width * 0.22f, size.height * 0.32f),
-                size = Size(size.width * 0.56f, size.height * 0.58f * bodyScale)
-            )
-
-            drawCircle(color = baseColor, radius = size.width * 0.22f, center = Offset(size.width / 2f, size.height * 0.38f))
-            drawCircle(color = outline.copy(alpha = 0.25f), radius = size.width * 0.22f, center = Offset(size.width / 2f, size.height * 0.38f), style = Stroke(width = size.minDimension * 0.045f))
-
-            drawCircle(color = Color.Black, radius = size.width * 0.04f, center = Offset(size.width * 0.44f, size.height * 0.36f))
-            drawCircle(color = Color.White, radius = size.width * 0.015f, center = Offset(size.width * 0.42f, size.height * 0.35f))
-            drawCircle(color = Color.Black, radius = size.width * 0.04f, center = Offset(size.width * 0.56f, size.height * 0.36f))
-            drawCircle(color = Color.White, radius = size.width * 0.015f, center = Offset(size.width * 0.58f, size.height * 0.35f))
-
-            val beakPath = Path().apply {
-                moveTo(size.width * 0.48f, size.height * 0.42f)
-                lineTo(size.width / 2f, size.height * 0.47f)
-                lineTo(size.width * 0.52f, size.height * 0.42f)
-                close()
-            }
-            drawPath(beakPath, color = beak)
-
-            val combPath = Path().apply {
-                moveTo(size.width * 0.45f, size.height * 0.25f)
-                cubicTo(size.width * 0.44f, size.height * 0.20f, size.width * 0.49f, size.height * 0.17f, size.width * 0.5f, size.height * 0.21f)
-                cubicTo(size.width * 0.51f, size.height * 0.17f, size.width * 0.56f, size.height * 0.2f, size.width * 0.55f, size.height * 0.25f)
-            }
-            drawPath(combPath, color = comb, style = Stroke(width = size.minDimension * 0.05f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
-
-            drawOval(
-                color = outline,
-                topLeft = Offset(size.width * 0.44f, size.height * 0.63f),
-                size = Size(size.width * 0.12f, size.height * 0.18f)
-            )
-        }
-    }
-}
 
 @Composable
 private fun GameBackground() {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawRect(
-            Brush.verticalGradient(
-                listOf(Color(0xFF6EC9FF), Color(0xFF9EE8FF), Color(0xFFF2FFB7))
-            ),
-            size = size
-        )
+    Image(
+        painter = painterResource(id = R.drawable.bg_game),
+        contentDescription = null,
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop
+    )
+}
 
-        val sunCenter = Offset(size.width * 0.82f, size.height * 0.22f)
-        drawCircle(Color(0xFFFFF59D), radius = size.minDimension * 0.1f, center = sunCenter)
-        drawCircle(Color(0x80FFF59D), radius = size.minDimension * 0.18f, center = sunCenter)
+@Composable
+private fun BoxScope.BackgroundClouds() {
+    Image(
+        painter = painterResource(id = R.drawable.cloud),
+        contentDescription = null,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(start = 24.dp, top = 48.dp)
+            .fillMaxWidth(0.4f),
+        contentScale = ContentScale.Fit,
+        alpha = 0.9f
+    )
 
-        val distantHill = Path().apply {
-            moveTo(-size.width * 0.2f, size.height * 0.65f)
-            quadraticBezierTo(size.width * 0.3f, size.height * 0.45f, size.width * 0.65f, size.height * 0.62f)
-            quadraticBezierTo(size.width * 1.05f, size.height * 0.52f, size.width * 1.2f, size.height * 0.68f)
-            lineTo(size.width * 1.2f, size.height)
-            lineTo(-size.width * 0.2f, size.height)
-            close()
-        }
-        drawPath(distantHill, brush = Brush.verticalGradient(listOf(Color(0xFF70C46A), Color(0xFF3E8A28))))
+    Image(
+        painter = painterResource(id = R.drawable.cloud),
+        contentDescription = null,
+        modifier = Modifier
+            .align(Alignment.TopCenter)
+            .padding(top = 64.dp)
+            .fillMaxWidth(0.32f),
+        contentScale = ContentScale.Fit,
+        alpha = 0.85f
+    )
 
-        val foreground = Path().apply {
-            moveTo(-size.width * 0.1f, size.height * 0.85f)
-            quadraticBezierTo(size.width * 0.25f, size.height * 0.78f, size.width * 0.5f, size.height * 0.86f)
-            quadraticBezierTo(size.width * 0.85f, size.height * 0.94f, size.width * 1.1f, size.height * 0.82f)
-            lineTo(size.width * 1.1f, size.height)
-            lineTo(-size.width * 0.1f, size.height)
-            close()
-        }
-        drawPath(foreground, brush = Brush.verticalGradient(listOf(Color(0xFF8BC34A), Color(0xFF4CAF50))))
+    Image(
+        painter = painterResource(id = R.drawable.cloud),
+        contentDescription = null,
+        modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(end = 24.dp, top = 56.dp)
+            .fillMaxWidth(0.36f),
+        contentScale = ContentScale.Fit,
+        alpha = 0.8f
+    )
+}
 
-        repeat(5) { index ->
-            val startX = size.width * (0.05f + index * 0.2f)
-            drawLine(
-                color = Color(0x33FFFFFF),
-                start = Offset(startX, size.height * 0.18f + index * 6f),
-                end = Offset(startX + size.width * 0.08f, size.height * 0.2f + index * 6f),
-                strokeWidth = size.minDimension * 0.003f
-            )
-        }
-    }
+@Composable
+private fun BoxScope.GameForegroundChicken() {
+    Image(
+        painter = painterResource(id = R.drawable.chicken),
+        contentDescription = null,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 12.dp)
+            .fillMaxWidth(0.4f),
+        contentScale = ContentScale.Fit
+    )
 }
