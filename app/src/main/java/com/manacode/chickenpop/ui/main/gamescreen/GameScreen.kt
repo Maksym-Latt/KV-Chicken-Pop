@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -437,6 +438,7 @@ private fun ChickenCell(
     effect: CellEffect?,
     onTap: () -> Unit,
     onEffectConsumed: (CellEffect) -> Unit,
+    modifier: Modifier
 ) {
     Box(
         modifier = modifier
