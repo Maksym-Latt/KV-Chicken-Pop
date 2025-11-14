@@ -99,6 +99,11 @@ dimen notification_small_icon_size_as_large
 dimen notification_subtext_size
 dimen notification_top_pad
 dimen notification_top_pad_large_text
+drawable bg_game
+drawable bg_menu
+drawable chicken
+drawable chicken_happy
+drawable cloud
 drawable ic_call_answer
 drawable ic_call_answer_low
 drawable ic_call_answer_video
@@ -120,6 +125,13 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable tile_bg
+drawable tile_house
+drawable tile_house_outside_chicken
+drawable tile_house_with_chicken
+drawable title
+font poppins_extra_bold
+font tillana_extra_bold
 id accessibility_action_clickable_span
 id accessibility_custom_action_0
 id accessibility_custom_action_1

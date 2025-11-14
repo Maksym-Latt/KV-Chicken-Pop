@@ -40,13 +40,16 @@ import kotlin.math.max
 @Composable
 fun SettingsOverlay(
     onClose: () -> Unit,
-    onPrivacy: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     // ----------------------- Colors -----------------------
-    val orangeTop = Color(0xffffc847)
-    val orangeBot = Color(0xff893c00)
-    val panelGrad = Brush.verticalGradient(listOf(orangeTop, orangeBot))
+    val panelGrad = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFF93311C),
+            Color(0xFFB47234),
+            Color(0xFF93311C)
+        )
+    )
     val cardShape = RoundedCornerShape(18.dp)
     val borderColor = Color(0xFF2B1A09)
 
@@ -91,7 +94,7 @@ fun SettingsOverlay(
             ) {
                 GradientOutlinedText(
                     text = "Settings",
-                    fontSize = 28.sp,
+                    fontSize = 46.sp,
                     gradientColors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF)),
                 )
                 Spacer(Modifier.height(12.dp))
@@ -114,14 +117,6 @@ fun SettingsOverlay(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp)
-                )
-
-                Spacer(Modifier.height(30.dp))
-
-                OrangePrimaryButton(
-                    text = "Privacy",
-                    onClick = onPrivacy,
-                    modifier = Modifier.fillMaxWidth(0.85f)
                 )
             }
         }

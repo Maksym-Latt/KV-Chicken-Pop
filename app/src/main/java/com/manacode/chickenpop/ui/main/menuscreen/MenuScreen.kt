@@ -28,6 +28,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.manacode.chickenpop.R
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
 import com.manacode.chickenpop.ui.main.component.SecondaryIconButton
 import com.manacode.chickenpop.ui.main.component.StartPrimaryButton
 
@@ -37,14 +38,14 @@ fun MenuScreen(
     lastScore: Int?,
     onOpenSettings: () -> Unit,
 ) {
+    // ---------------- Root Surface ----------------
     Surface(color = Color(0xFFFFF4D9)) {
         Box(modifier = Modifier.fillMaxSize()) {
+
+            // ---------------- Background ----------------
             MenuBackground()
 
-            MenuClouds()
-
-            MenuForeground()
-
+            // ---------------- Settings Button (Top-Start) ----------------
             SecondaryIconButton(
                 onClick = onOpenSettings,
                 modifier = Modifier
@@ -59,41 +60,40 @@ fun MenuScreen(
                 )
             }
 
-            Column(
+            // ---------------- Center Content ----------------
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp)
-                    .padding(top = 96.dp, bottom = 36.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.Center
             ) {
-                TitleBanner()
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
+
+                    // ------ Title Banner ------
+                    TitleBanner()
+
+                    // ------ Chicken Hero ------
                     MenuChickenHero()
 
+                    // ------ Start Button ------
                     StartPrimaryButton(
                         onClick = onStartGame,
-                        modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .height(60.dp)
+                        modifier = Modifier.fillMaxWidth(0.7f)
                     )
 
+                    // ------ Last Score ------
                     if (lastScore != null) {
-                        Text(
+                        GradientOutlinedText(
                             text = "Last score: $lastScore",
-                            color = Color(0xFF4B2A0D),
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium
+                            fontSize = 16.sp,
+                            gradientColors = listOf(Color.White, Color.White)
                         )
                     }
                 }
-
-                FarmRow()
             }
         }
     }
@@ -110,51 +110,12 @@ private fun MenuBackground() {
 }
 
 @Composable
-private fun BoxScope.MenuClouds() {
-    Image(
-        painter = painterResource(id = R.drawable.cloud),
-        contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(top = 64.dp, end = 32.dp)
-            .fillMaxWidth(0.4f),
-        contentScale = ContentScale.Fit,
-        alpha = 0.85f
-    )
-
-    Image(
-        painter = painterResource(id = R.drawable.cloud),
-        contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(top = 72.dp, start = 28.dp)
-            .fillMaxWidth(0.35f),
-        contentScale = ContentScale.Fit,
-        alpha = 0.75f
-    )
-}
-
-@Composable
-private fun BoxScope.MenuForeground() {
-    Image(
-        painter = painterResource(id = R.drawable.tile_bg),
-        contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .fillMaxWidth()
-            .height(96.dp),
-        contentScale = ContentScale.Crop,
-        alpha = 0.7f
-    )
-}
-
-@Composable
 private fun TitleBanner() {
     Image(
         painter = painterResource(id = R.drawable.title),
         contentDescription = null,
         modifier = Modifier.fillMaxWidth(0.8f),
-        contentScale = ContentScale.Fit
+        contentScale = ContentScale.Crop
     )
 }
 
@@ -163,35 +124,7 @@ private fun MenuChickenHero() {
     Image(
         painter = painterResource(id = R.drawable.chicken),
         contentDescription = null,
-        modifier = Modifier.fillMaxWidth(0.7f),
-        contentScale = ContentScale.Fit
+        modifier = Modifier.fillMaxWidth(0.5f),
+        contentScale = ContentScale.Crop
     )
-}
-
-@Composable
-private fun FarmRow() {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            repeat(3) {
-                Image(
-                    painter = painterResource(id = R.drawable.tile_house),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(110.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-    }
 }

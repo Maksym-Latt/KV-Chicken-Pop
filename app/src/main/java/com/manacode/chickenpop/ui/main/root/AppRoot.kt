@@ -18,7 +18,6 @@ import com.manacode.chickenpop.audio.rememberAudioController
 import com.manacode.chickenpop.ui.main.gamescreen.GameScreen
 import com.manacode.chickenpop.ui.main.menuscreen.MainViewModel
 import com.manacode.chickenpop.ui.main.menuscreen.MenuScreen
-import com.manacode.chickenpop.ui.main.menuscreen.overlay.PrivacyOverlay
 import com.manacode.chickenpop.ui.main.menuscreen.overlay.SettingsOverlay
 
 @Composable
@@ -63,15 +62,7 @@ fun AppRoot(
                         if (showMenuSettings) {
                             SettingsOverlay(
                                 onClose = { showMenuSettings = false },
-                                onPrivacy = {
-                                    showMenuSettings = false
-                                    showMenuPrivacy = true
-                                }
                             )
-                        }
-
-                        if (showMenuPrivacy) {
-                            PrivacyOverlay(onClose = { showMenuPrivacy = false })
                         }
                     }
 

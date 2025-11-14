@@ -126,7 +126,7 @@ private fun GameOverChicken() {
         contentAlignment = Alignment.BottomCenter
     ) {
         Image(
-            painter = painterResource(id = R.drawable.bg_game),
+            painter = painterResource(id = R.drawable.bg_menu),
             contentDescription = null,
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.Crop,

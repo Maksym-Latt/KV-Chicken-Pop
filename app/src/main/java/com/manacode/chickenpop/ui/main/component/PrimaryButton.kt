@@ -1,5 +1,6 @@
 package com.manacode.chickenpop.ui.main.component
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,15 +15,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.min
 
 // ---------- Public API ----------
 @Composable
@@ -59,43 +67,26 @@ private fun PrimaryButton(
     modifier: Modifier = Modifier,
     variant: PrimaryVariant
 ) {
-    val shape = RoundedCornerShape(100.dp)
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-
-    // Градиенты из макета
-    val gradient = when (variant) {
-        PrimaryVariant.StartGreen ->
-            if (!pressed) Brush.verticalGradient(0f to Color(0xFFA7FF4A), 0.89f to Color(0xFF156D00))
-            else          Brush.verticalGradient(0f to Color(0xFF99B978), 0.89f to Color(0xFF0C3F00))
-
-        PrimaryVariant.Orange ->
-            if (!pressed) Brush.verticalGradient(0f to Color(0xFFFFE3A1), 1f to Color(0xFFF56B00))
-            else          Brush.verticalGradient(0f to Color(0xFFFFC847), 1f to Color(0xFFAA4A00))
-    }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
 
     // Параметры типографики/паддингов из макетов
     val params: ButtonParams = when (variant) {
-        PrimaryVariant.StartGreen -> {
-            val fam = FontFamily.SansSerif
-            ButtonParams(
-                family = fam,
-                weight = FontWeight.ExtraBold,
-                size = 36.sp,
-                line = 44.sp,
-                padH = 44.dp
-            )
-        }
-        PrimaryVariant.Orange -> {
-            val fam = FontFamily.SansSerif
-            ButtonParams(
-                family = fam,
-                weight = FontWeight.Bold,
-                size = 24.sp,
-                line = 32.sp,
-                padH = 24.dp
-            )
-        }
+        PrimaryVariant.StartGreen -> ButtonParams(
+            family = FontFamily.SansSerif,
+            weight = FontWeight.ExtraBold,
+            size = 36.sp,
+            line = 44.sp,
+            padH = 44.dp
+        )
+
+        PrimaryVariant.Orange -> ButtonParams(
+            family = FontFamily.SansSerif,
+            weight = FontWeight.Bold,
+            size = 24.sp,
+            line = 32.sp,
+            padH = 24.dp
+        )
     }
 
     val baseText = Color(0xFFF5F5F5)
@@ -105,23 +96,167 @@ private fun PrimaryButton(
         blue = (baseText.blue * 0.85f).coerceIn(0f, 1f),
         alpha = 1f
     )
-    val textColor = if (pressed) pressedText else baseText
+    val textColor = if (isPressed) pressedText else baseText
 
     Box(
         modifier = modifier
-            .shadow(24.dp, shape, clip = false, spotColor = Color(0x80343434))
-            .clip(shape)
-            .background(gradient)
-            .padding(vertical = 8.dp, horizontal = params.padH)
-            .clickable(interactionSource = interaction, indication = null, onClick = onClick),
+            .defaultMinSize(minHeight = 60.dp)
+            .clipToBounds()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center
     ) {
-        GradientOutlinedText(
-            text = text,
-            fontSize = params.size,
-            gradientColors = listOf(textColor, textColor),
+        // 3D-фон как у SecondaryIconButton, только пилюля
+        Canvas(modifier = Modifier.matchParentSize()) {
+            draw3DPrimaryPill(
+                canvasSize = size,
+                isPressed = isPressed,
+                variant = variant
+            )
+        }
+
+        // Текст поверх
+        Box(
+            modifier = Modifier
+                .padding(horizontal = params.padH, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            GradientOutlinedText(
+                text = text,
+                fontSize = params.size,
+                gradientColors = listOf(textColor, textColor),
+            )
+        }
+    }
+}
+
+private data class PrimaryPillColors(
+    val shadowColor: Color,
+    val bottomBrush: Brush,   // подложка (тёмная капсула снизу)
+    val borderColor: Color,
+    val topIdle: Brush,
+    val topPressed: Brush
+)
+
+private fun DrawScope.draw3DPrimaryPill(
+    canvasSize: Size,
+    isPressed: Boolean,
+    variant: PrimaryVariant
+) {
+    if (canvasSize.width <= 0f || canvasSize.height <= 0f) return
+
+    val w = canvasSize.width
+    val h = canvasSize.height
+    val centerY = h / 2f
+
+    val scale = min(w, h) / 100f
+
+    val colors = when (variant) {
+        PrimaryVariant.StartGreen -> PrimaryPillColors(
+            shadowColor = Color(0x66000000),
+            bottomBrush = Brush.verticalGradient(
+                listOf(
+                    Color(0xFF0C3F00),
+                    Color(0xFF062400)
+                )
+            ),
+            borderColor = Color(0xFF063000),
+            topIdle = Brush.verticalGradient(
+                listOf(
+                    Color(0xFFA7FF4A),
+                    Color(0xFF156D00)
+                )
+            ),
+            topPressed = Brush.verticalGradient(
+                listOf(
+                    Color(0xFF99B978),
+                    Color(0xFF0C3F00)
+                )
+            )
+        )
+
+        PrimaryVariant.Orange -> PrimaryPillColors(
+            shadowColor = Color(0x66000000),
+            bottomBrush = Brush.verticalGradient(
+                listOf(
+                    Color(0xFFAA4A00),
+                    Color(0xFF5A1F00)
+                )
+            ),
+            borderColor = Color(0xFF5A1F00),
+            topIdle = Brush.verticalGradient(
+                listOf(
+                    Color(0xFFFFE3A1),
+                    Color(0xFFF56B00)
+                )
+            ),
+            topPressed = Brush.verticalGradient(
+                listOf(
+                    Color(0xFFFFC847),
+                    Color(0xFFAA4A00)
+                )
+            )
         )
     }
+
+    val topBrush = if (isPressed) colors.topPressed else colors.topIdle
+
+    // ---------- 1) Мягкая тень под кнопкой ----------
+    drawOval(
+        color = colors.shadowColor,
+        topLeft = Offset(
+            x = w * 0.05f,
+            y = h * 0.67f
+        ),
+        size = Size(
+            width = w * 0.9f,
+            height = h * 0.40f   // чуть больше тень
+        )
+    )
+
+    // ---------- 2) Кнопка стала толще ----------
+    val horizontalInset = 3f * scale
+
+    // толщина кнопки была ~0.60h, теперь увеличим до 0.72h
+    val pillHeight = h * 0.72f
+    val pillRadius = pillHeight / 2f
+
+    // расстояние между верхом и нижней капсулой — кнопка «приподнята»
+    val liftOffset = if (isPressed) h * 0.04f else h * 0.095f
+
+    // Нижняя капсула (подложка)
+    val bottomCenterY = centerY + liftOffset
+    val bottomTop = bottomCenterY - pillHeight / 2f
+
+    drawRoundRect(
+        brush = colors.bottomBrush,
+        topLeft = Offset(horizontalInset, bottomTop),
+        size = Size(w - horizontalInset * 2, pillHeight),
+        cornerRadius = CornerRadius(pillRadius, pillRadius)
+    )
+
+    // Верхняя (основная) капсула
+    val topCenterY = centerY
+    val topTop = topCenterY - pillHeight / 2f
+
+    drawRoundRect(
+        brush = topBrush,
+        topLeft = Offset(horizontalInset, topTop),
+        size = Size(w - horizontalInset * 2, pillHeight),
+        cornerRadius = CornerRadius(pillRadius, pillRadius)
+    )
+
+    // Бордер
+    drawRoundRect(
+        color = colors.borderColor,
+        topLeft = Offset(horizontalInset, topTop),
+        size = Size(w - horizontalInset * 2, pillHeight),
+        cornerRadius = CornerRadius(pillRadius, pillRadius),
+        style = Stroke(width = 3.5f * scale)  // немного толще
+    )
 }
 
 /** Параметры кнопки (типографика + горизонтальный паддинг) */

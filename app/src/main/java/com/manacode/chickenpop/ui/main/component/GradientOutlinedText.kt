@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.res.ResourcesCompat
+import com.manacode.chickenpop.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -34,14 +36,16 @@ fun GradientOutlinedText(
     text: String,
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 44.sp,
-    strokeWidth: Float = 5f,
+    strokeWidth: Float = 9f,
     gradientColors: List<Color> = listOf(Color(0xFFFFA726), Color(0xFFFF6F00))
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
     val textSizePx = with(density) { fontSize.toPx() }
 
-    val typeface = remember { android.graphics.Typeface.DEFAULT_BOLD }
+    val typeface = remember {
+        ResourcesCompat.getFont(context, R.font.tillana_extra_bold)
+    }
 
     Canvas(
         modifier = modifier
@@ -83,7 +87,7 @@ fun GradientOutlinedTextShort(
     text: String,
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 44.sp,
-    strokeWidth: Float = 5f,
+    strokeWidth: Float = 9f,
     gradientColors: List<Color> = listOf(Color(0xFFFFA726), Color(0xFFFF6F00)),
     textAlign: TextAlign = TextAlign.Start,
     horizontalPadding: Dp = 0.dp
@@ -93,11 +97,13 @@ fun GradientOutlinedTextShort(
     val textSizePx = with(density) { fontSize.toPx() }
     val padPx = with(density) { horizontalPadding.toPx() }
 
-    val typeface = remember { android.graphics.Typeface.DEFAULT_BOLD }
+    val typeface = remember {
+        ResourcesCompat.getFont(context, R.font.tillana_extra_bold)
+    }
+
 
     Canvas(
         modifier = modifier
-            .fillMaxWidth()
             .height((fontSize.value * 1.3f).dp)
     ) {
         val paint = android.graphics.Paint().apply {

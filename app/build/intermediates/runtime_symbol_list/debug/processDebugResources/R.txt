@@ -98,6 +98,11 @@ int dimen notification_small_icon_size_as_large 0x7f050018
 int dimen notification_subtext_size 0x7f050019
 int dimen notification_top_pad 0x7f05001a
 int dimen notification_top_pad_large_text 0x7f05001b
+int drawable bg_game 0x7f060016
+int drawable bg_menu 0x7f060017
+int drawable chicken 0x7f060018
+int drawable chicken_happy 0x7f060019
+int drawable cloud 0x7f06001a
 int drawable ic_call_answer 0x7f060001
 int drawable ic_call_answer_low 0x7f060002
 int drawable ic_call_answer_video 0x7f060003
@@ -119,6 +124,13 @@ int drawable notification_template_icon_bg 0x7f060012
 int drawable notification_template_icon_low_bg 0x7f060013
 int drawable notification_tile_bg 0x7f060014
 int drawable notify_panel_notification_icon_bg 0x7f060015
+int drawable tile_bg 0x7f06001b
+int drawable tile_house 0x7f06001c
+int drawable tile_house_outside_chicken 0x7f06001d
+int drawable tile_house_with_chicken 0x7f06001e
+int drawable title 0x7f06001f
+int font poppins_extra_bold 0x7f0f0000
+int font tillana_extra_bold 0x7f0f0001
 int id accessibility_action_clickable_span 0x7f070000
 int id accessibility_custom_action_0 0x7f070001
 int id accessibility_custom_action_1 0x7f070002

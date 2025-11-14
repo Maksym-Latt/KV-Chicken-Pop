@@ -17,26 +17,29 @@ import androidx.compose.ui.unit.sp
 @Composable
 public fun LabeledSlider(
     title: String,
-    value: Int,                 // 0..100
+    value: Int,
     onChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.padding(10.dp)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(10.dp)
+                .padding(end = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             GradientOutlinedTextShort(
                 text = title,
-                fontSize = 18.sp,
+                fontSize = 28.sp,
                 gradientColors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF)),
             )
+            Spacer(Modifier.fillMaxWidth())
+
             GradientOutlinedText(
                 text = "${value}%",
-                fontSize = 18.sp,
+                fontSize = 28.sp,
                 gradientColors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF)),
             )
         }
