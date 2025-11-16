@@ -1,22 +1,13 @@
 package com.manacode.chickenpop.ui.main.gamescreen
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Canvas
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -30,14 +21,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -51,16 +44,20 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.Icon
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.manacode.chickenpop.audio.rememberAudioController
 import com.manacode.chickenpop.R
+import com.manacode.chickenpop.game.GameEngine
 import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
 import com.manacode.chickenpop.ui.main.gamescreen.GameViewModel.TapOutcome
 import com.manacode.chickenpop.ui.main.gamescreen.overlay.GameSettingsOverlay
@@ -72,16 +69,37 @@ fun GameScreen(
     onExitToMenu: (Int) -> Unit,
     viewModel: GameViewModel = viewModel(),
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val audio = rememberAudioController()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     LaunchedEffect(Unit) {
-        audio.playGameMusic()
         viewModel.startGame()
+        audio.playGameMusic()
     }
 
-    LaunchedEffect(state.showGameOver) {
-        if (state.showGameOver) {
-            audio.playGameWin()
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                val current = viewModel.state.value
+                if (current.phase == GameViewModel.GamePhase.Running) {
+                    viewModel.pause()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(state.phase) {
+        when (state.phase) {
+            GameViewModel.GamePhase.Running -> audio.resumeMusic()
+            GameViewModel.GamePhase.Paused -> audio.pauseMusic()
+            GameViewModel.GamePhase.Result -> {
+                audio.stopMusic()
+                audio.playGameWin()
+            }
+            GameViewModel.GamePhase.Intro -> audio.stopMusic()
         }
     }
 
@@ -109,8 +127,16 @@ fun GameScreen(
         previousChickens = current
     }
 
-    BackHandler(enabled = !state.showPause && !state.showGameOver) {
-        viewModel.openPause()
+    BackHandler {
+        when (state.phase) {
+            GameViewModel.GamePhase.Running -> viewModel.pause()
+            GameViewModel.GamePhase.Paused -> viewModel.resume()
+            GameViewModel.GamePhase.Result, GameViewModel.GamePhase.Intro -> {
+                val finalScore = state.score
+                viewModel.exitToMenu()
+                onExitToMenu(finalScore)
+            }
+        }
     }
 
     Surface(color = Color(0xFFFFF4D9)) {
@@ -124,11 +150,13 @@ fun GameScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
                 TopHud(
+                    phase = state.phase,
                     timeSeconds = state.remainingSeconds,
                     score = state.score,
                     combo = state.combo,
-                    onPause = viewModel::openPause,
-                    speed = state.speedLevel
+                    speed = state.speedLevel,
+                    rareHits = state.rareHits,
+                    onPause = viewModel::pause
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -140,7 +168,12 @@ fun GameScreen(
                         when (val outcome = viewModel.tap(slot)) {
                             is TapOutcome.Hit -> {
                                 recentHitIds += outcome.chickenId
-                                triggerEffect(slot, EffectType.Hit)
+                                val effectType = if (outcome.type == GameEngine.ChickenType.Rare) {
+                                    EffectType.Rare
+                                } else {
+                                    EffectType.Hit
+                                }
+                                triggerEffect(slot, effectType)
                             }
                             TapOutcome.Miss -> triggerEffect(slot, EffectType.Miss)
                         }
@@ -153,23 +186,28 @@ fun GameScreen(
 
             GameForegroundChicken()
 
-            if (state.showPause) {
+            if (state.phase == GameViewModel.GamePhase.Paused) {
                 GameSettingsOverlay(
                     onResume = viewModel::resume,
                     onRetry = viewModel::retry,
                     onHome = {
-                        viewModel.finishEarly()
-                        onExitToMenu(state.score)
+                        val finalScore = state.score
+                        viewModel.exitToMenu()
+                        onExitToMenu(finalScore)
                     }
                 )
             }
 
-            if (state.showGameOver) {
+            if (state.phase == GameViewModel.GamePhase.Result) {
                 WinOverlay(
                     score = state.score,
                     combo = state.bestCombo,
                     onRetry = viewModel::retry,
-                    onHome = { onExitToMenu(state.score) }
+                    onHome = {
+                        val finalScore = state.score
+                        viewModel.exitToMenu()
+                        onExitToMenu(finalScore)
+                    }
                 )
             }
         }
@@ -178,58 +216,89 @@ fun GameScreen(
 
 private data class CellEffect(val id: Long, val slot: Int, val type: EffectType)
 
-private enum class EffectType { Hit, Miss, Escape }
+private enum class EffectType { Hit, Miss, Escape, Rare }
 
 @Composable
 private fun TopHud(
+    phase: GameViewModel.GamePhase,
     timeSeconds: Int,
     score: Int,
     combo: Int,
-    onPause: () -> Unit,
     speed: Int,
+    rareHits: Int,
+    onPause: () -> Unit,
 ) {
+    val canPause = phase == GameViewModel.GamePhase.Running
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            PauseButton(
+                enabled = canPause,
+                onClick = onPause,
+                modifier = Modifier.size(60.dp)
+            )
+
+            Spacer(modifier = Modifier.width(14.dp))
+
             ScoreBoard(
                 score = score,
                 timeSeconds = timeSeconds,
                 modifier = Modifier.weight(1f)
             )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            MenuButton(onPause = onPause)
         }
 
-        val showBottomRow = combo >= 2 || speed > 0
-        if (showBottomRow) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AnimatedVisibility(visible = combo >= 2, enter = fadeIn(), exit = fadeOut()) {
-                    ComboPlank(combo = combo)
-                }
+        StatusRow(
+            combo = combo,
+            speed = speed,
+            rareHits = rareHits
+        )
+    }
+}
 
-                AnimatedVisibility(visible = speed > 0, enter = fadeIn(), exit = fadeOut()) {
-                    SpeedBadge(level = speed)
-                }
-            }
-        }
+@Composable
+private fun PauseButton(enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val interaction = remember { MutableInteractionSource() }
+    val shape = CircleShape
+    val background = if (enabled) {
+        Brush.verticalGradient(listOf(Color(0xFFFFD27F), Color(0xFFE6801C)))
+    } else {
+        Brush.verticalGradient(listOf(Color(0xFFE4C7A4), Color(0xFFB68A56)))
+    }
+    Box(
+        modifier = modifier
+            .shadow(18.dp, shape, clip = false, spotColor = Color(0x8843210C))
+            .clip(shape)
+            .background(background)
+            .border(2.dp, Color(0xFF5A2A09), shape)
+            .clickable(
+                enabled = enabled,
+                interactionSource = interaction,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Pause,
+            contentDescription = "Pause",
+            tint = Color.White,
+            modifier = Modifier.fillMaxSize(0.52f)
+        )
     }
 }
 
 @Composable
 private fun ScoreBoard(score: Int, timeSeconds: Int, modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(26.dp)
+    val safeScore = score.coerceAtLeast(0)
+    val scoreText = safeScore.toString().padStart(4, '0')
     val timeFormatted = run {
         val safeSeconds = timeSeconds.coerceAtLeast(0)
         val minutes = safeSeconds / 60
@@ -239,26 +308,29 @@ private fun ScoreBoard(score: Int, timeSeconds: Int, modifier: Modifier = Modifi
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(26.dp))
+            .shadow(16.dp, shape, clip = false, spotColor = Color(0x553E1D0A))
+            .clip(shape)
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFFAA652D), Color(0xFF6B3C16))
+                    listOf(Color(0xFFFFB347), Color(0xFFB46018))
                 )
             )
-            .border(2.dp, Color(0xFF3E1D0A), RoundedCornerShape(26.dp))
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .border(2.dp, Color(0xFF3E1D0A), shape)
+            .padding(horizontal = 22.dp, vertical = 14.dp),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             Text(
-                text = "Score: ${score.toString().padStart(4, '0')}",
+                text = "Score $scoreText",
                 color = Color(0xFFFFF3D9),
-                fontSize = 26.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Black
             )
-            Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Time: $timeFormatted",
+                text = "Time $timeFormatted",
                 color = Color(0xFFFFF3D9),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold
@@ -268,87 +340,73 @@ private fun ScoreBoard(score: Int, timeSeconds: Int, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun MenuButton(onPause: () -> Unit) {
-    val shape = RoundedCornerShape(18.dp)
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val gradient = if (pressed) {
-        Brush.verticalGradient(listOf(Color(0xFFE8952D), Color(0xFF8C3C08)))
-    } else {
-        Brush.verticalGradient(listOf(Color(0xFFFFD27F), Color(0xFFDA7F21)))
+private fun StatusRow(combo: Int, speed: Int, rareHits: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        InfoBadge(
+            label = "Combo",
+            value = "x$combo",
+            highlight = combo >= 2,
+            modifier = Modifier.weight(1f)
+        )
+        InfoBadge(
+            label = "Speed",
+            value = (speed + 1).toString(),
+            highlight = speed > 0,
+            modifier = Modifier.weight(1f)
+        )
+        InfoBadge(
+            label = "Rare",
+            value = rareHits.toString(),
+            highlight = rareHits > 0,
+            modifier = Modifier.weight(1f)
+        )
     }
+}
+
+@Composable
+private fun InfoBadge(
+    label: String,
+    value: String,
+    highlight: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(18.dp)
+    val gradient = if (highlight) {
+        Brush.verticalGradient(listOf(Color(0xFFFFC56C), Color(0xFFB45B1F)))
+    } else {
+        Brush.verticalGradient(listOf(Color(0xFFECD7BC), Color(0xFFC59A6A)))
+    }
+    val labelColor = if (highlight) Color(0xFF3E1F0A) else Color(0xFF6B4A2F)
+    val valueColor = if (highlight) Color.White else Color(0xFF3E2A1A)
 
     Box(
-        modifier = Modifier
-            .shadow(18.dp, shape, spotColor = Color(0x8043210C), clip = false)
+        modifier = modifier
             .clip(shape)
             .background(gradient)
-            .border(2.dp, Color(0xFF5A2A09), shape)
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
-                onClick = onPause
-            )
-            .padding(horizontal = 22.dp, vertical = 12.dp)
-            .widthIn(min = 96.dp),
+            .border(2.dp, Color(0xFF4F250C), shape)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "MENU",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.ExtraBold
-        )
-    }
-}
-
-@Composable
-private fun ComboPlank(combo: Int) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFFFC56C), Color(0xFFB45B1F))
-                )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = label,
+                color = labelColor,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
             )
-            .border(2.dp, Color(0xFF4F250C), RoundedCornerShape(18.dp))
-            .padding(horizontal = 18.dp, vertical = 8.dp)
-    ) {
-        Text(
-            text = "Combo x$combo",
-            color = Color(0xFF3E1F0A),
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 18.sp
-        )
-    }
-}
-
-@Composable
-private fun SpeedBadge(level: Int) {
-    val oscillate by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(600, easing = { it }),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "speed_badge"
-    )
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(18.dp))
-            .background(Brush.verticalGradient(listOf(Color(0xFFBFFFA8), Color(0xFF5FB93A))))
-            .graphicsLayer { scaleX = 0.94f + oscillate * 0.06f; scaleY = 0.94f + oscillate * 0.06f }
-            .border(2.dp, Color(0xFF2D5E1A), RoundedCornerShape(18.dp))
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Speed ${level + 1}",
-            color = Color(0xFF14440F),
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp
-        )
+            Text(
+                text = value,
+                color = valueColor,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+        }
     }
 }
 
@@ -417,14 +475,17 @@ private fun ChickenCell(
     modifier: Modifier
 ) {
     val shape = RoundedCornerShape(20.dp)
+    val interaction = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
             .shadow(12.dp, shape, clip = false, ambientColor = Color(0x33231105), spotColor = Color(0x33231105))
             .clip(shape)
             .background(Color.Transparent)
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = { onTap() })
-            }
+            .clickable(
+                interactionSource = interaction,
+                indication = null,
+                onClick = onTap
+            )
     ) {
         Image(
             painter = painterResource(id = R.drawable.tile_bg),
@@ -434,10 +495,10 @@ private fun ChickenCell(
         )
 
         val stateRes = remember(chicken) {
-            when (chicken?.phase) {
-                GameViewModel.ChickenPhase.Peeking -> R.drawable.tile_house_with_chicken
-                GameViewModel.ChickenPhase.Outside -> R.drawable.tile_house_outside_chicken
-                else -> R.drawable.tile_house
+            when {
+                chicken == null -> R.drawable.tile_house
+                chicken.isRare -> R.drawable.tile_house_outside_chicken
+                else -> R.drawable.tile_house_with_chicken
             }
         }
 
@@ -447,6 +508,14 @@ private fun ChickenCell(
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
+            )
+        }
+
+        if (chicken?.isRare == true) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .border(3.dp, Color(0xFFFFE082), shape)
             )
         }
 
@@ -470,6 +539,15 @@ private fun EffectOverlay(effect: CellEffect, onEffectConsumed: (CellEffect) -> 
                     text = "POW!",
                     fontSize = 26.sp,
                     gradientColors = listOf(Color(0xFFFFF176), Color(0xFFFF5722))
+                )
+            }
+        }
+        EffectType.Rare -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                GradientOutlinedText(
+                    text = "+100",
+                    fontSize = 28.sp,
+                    gradientColors = listOf(Color(0xFFFFF9C4), Color(0xFFFFC107))
                 )
             }
         }

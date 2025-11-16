@@ -12,24 +12,26 @@ class DefaultAudioController @Inject constructor(
     private var musicVolume: Float = settingsRepository.getMusicVolume().toVolume()
     private var soundVolume: Float = settingsRepository.getSoundVolume().toVolume()
 
+    private var currentMusic: MusicTrack? = null
+
     override fun playMenuMusic() {
-        // Placeholder implementation - no bundled music per requirements.
+        playMusic(MusicTrack.MenuTheme)
     }
 
     override fun playGameMusic() {
-        // Placeholder implementation - no bundled music per requirements.
+        playMusic(MusicTrack.GameLoop)
     }
 
     override fun stopMusic() {
-        // No-op placeholder.
+        currentMusic = null
     }
 
     override fun pauseMusic() {
-        // No-op placeholder.
+        // Stub implementation – actual audio engine not bundled.
     }
 
     override fun resumeMusic() {
-        // No-op placeholder.
+        // Stub implementation – actual audio engine not bundled.
     }
 
     override fun setMusicVolume(percent: Int) {
@@ -41,8 +43,29 @@ class DefaultAudioController @Inject constructor(
     }
 
     override fun playGameWin() {
-        // Placeholder implementation - sound effects disabled.
+        playSound(SoundCue.VictoryFanfare)
+    }
+
+    private fun playMusic(track: MusicTrack) {
+        currentMusic = track
+        // A real implementation would stream the asset referenced in track.assetPath at musicVolume.
+    }
+
+    private fun playSound(effect: SoundCue) {
+        // A real implementation would trigger the asset referenced in effect.assetPath at soundVolume.
     }
 
     private fun Int.toVolume(): Float = (this.coerceIn(0, 100) / 100f).coerceIn(0f, 1f)
+
+    private enum class MusicTrack(val assetPath: String) {
+        MenuTheme("audio/music/menu_theme.ogg"),
+        GameLoop("audio/music/game_loop.ogg")
+    }
+
+    private enum class SoundCue(val assetPath: String) {
+        VictoryFanfare("audio/sfx/victory_fanfare.wav"),
+        ChickenHit("audio/sfx/chicken_hit.wav"),
+        RareChicken("audio/sfx/rare_chicken.wav"),
+        ChickenEscape("audio/sfx/chicken_escape.wav")
+    }
 }
