@@ -92,8 +92,11 @@ class GameEngine(
             var previous = SystemClock.elapsedRealtime()
             while (isActive) {
                 delay(TICK_RATE)
-                if (!isRunning || isPaused) continue
                 val now = SystemClock.elapsedRealtime()
+                if (!isRunning || isPaused) {
+                    previous = now
+                    continue
+                }
                 val delta = now - previous
                 previous = now
                 tick(delta)

@@ -147,6 +147,12 @@ fun GameScreen(
     }
 
     LaunchedEffect(state.chickens) {
+        if (state.phase != GameViewModel.GamePhase.Running) {
+            previousChickens = state.chickens.associate { it.id to it.slotIndex }
+            recentHitIds.clear()
+            return@LaunchedEffect
+        }
+
         val current = state.chickens.associate { it.id to it.slotIndex }
         val removed = previousChickens.filterKeys { it !in current }
         removed.forEach { (id, slot) ->
