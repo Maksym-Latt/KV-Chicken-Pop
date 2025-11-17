@@ -92,6 +92,7 @@ fun GameScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val audio = rememberAudioController()
     val lifecycleOwner = LocalLifecycleOwner.current
+    var exitingToMenu by remember { mutableStateOf(false) }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -108,7 +109,8 @@ fun GameScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(state.phase) {
+    LaunchedEffect(state.phase, exitingToMenu) {
+        if (exitingToMenu) return@LaunchedEffect
         when (state.phase) {
             GameViewModel.GamePhase.Running -> {
                 audio.playGameMusic()
@@ -119,7 +121,7 @@ fun GameScreen(
                 audio.stopMusic()
                 audio.playGameWin()
             }
-            GameViewModel.GamePhase.Intro -> audio.stopMusic()
+            GameViewModel.GamePhase.Intro -> Unit
         }
     }
 
@@ -155,10 +157,12 @@ fun GameScreen(
             GameViewModel.GamePhase.Running -> viewModel.pauseAndOpenSettings()
             GameViewModel.GamePhase.Result -> {
                 val finalScore = state.score
+                exitingToMenu = true
                 viewModel.exitToMenu()
                 onExitToMenu(finalScore)
             }
             GameViewModel.GamePhase.Intro -> {
+                exitingToMenu = true
                 viewModel.exitToMenu()
                 onExitToMenu(state.score)
             }
@@ -252,6 +256,7 @@ fun GameScreen(
                     onRetry = viewModel::retry,
                     onHome = {
                         val finalScore = state.score
+                        exitingToMenu = true
                         viewModel.exitToMenu()
                         onExitToMenu(finalScore)
                     }
@@ -265,6 +270,7 @@ fun GameScreen(
                     onRetry = viewModel::retry,
                     onHome = {
                         val finalScore = state.score
+                        exitingToMenu = true
                         viewModel.exitToMenu()
                         onExitToMenu(finalScore)
                     }
