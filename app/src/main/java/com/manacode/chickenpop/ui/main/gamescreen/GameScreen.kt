@@ -96,13 +96,23 @@ fun GameScreen(
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_PAUSE) {
-                val current = viewModel.state.value
-                val isSettingsShown = current.phase == GameViewModel.GamePhase.Paused
-                val isWinShown = current.phase == GameViewModel.GamePhase.Result
-                if (!isWinShown && !isSettingsShown) {
-                    viewModel.pauseAndOpenSettings()
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    val current = viewModel.state.value
+                    val isSettingsShown = current.phase == GameViewModel.GamePhase.Paused
+                    val isWinShown = current.phase == GameViewModel.GamePhase.Result
+                    if (!isWinShown && !isSettingsShown) {
+                        viewModel.pauseAndOpenSettings()
+                    }
                 }
+
+                Lifecycle.Event.ON_RESUME -> {
+                    if (viewModel.state.value.phase == GameViewModel.GamePhase.Paused) {
+                        audio.pauseMusic()
+                    }
+                }
+
+                else -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
