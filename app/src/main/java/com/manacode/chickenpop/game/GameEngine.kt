@@ -139,7 +139,22 @@ class GameEngine(
         val idx = activeChickens.indexOfFirst { it.slotIndex == slotIndex }
         if (idx == -1) {
             combo = 0
-            _state.update { it.copy(combo = 0) }
+            timeLeft = (timeLeft - MISS_TIME_PENALTY).coerceAtLeast(0L)
+
+            if (timeLeft == 0L) {
+                completeGame()
+                return TapResult.Miss
+            }
+
+            _state.update {
+                it.copy(
+                    remainingMillis = timeLeft,
+                    combo = 0,
+                    bestCombo = bestCombo,
+                    speedLevel = speedLevel,
+                    chickens = activeChickens.map { chicken -> chicken.toUi() }
+                )
+            }
             return TapResult.Miss
         }
 
@@ -303,6 +318,8 @@ class GameEngine(
         private const val MIN_VISIBLE_TIME = 420L
         private const val VISIBLE_REDUCTION_STEP = 55L
         private const val RARE_VISIBLE_TIME = 1_400L
+
+        private const val MISS_TIME_PENALTY = 5_000L
 
         private const val BASE_SCORE_REWARD = 60
         private const val SPEED_SCORE_BONUS = 12

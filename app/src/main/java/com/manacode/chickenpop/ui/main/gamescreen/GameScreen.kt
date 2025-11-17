@@ -93,18 +93,14 @@ fun GameScreen(
     val audio = rememberAudioController()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // ----------------------- Старт игры и музыка -----------------------
-    LaunchedEffect(Unit) {
-        viewModel.startGame()
-        audio.playGameMusic()
-    }
-
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_PAUSE) {
                 val current = viewModel.state.value
-                if (current.phase == GameViewModel.GamePhase.Running) {
-                    viewModel.pause()
+                val isSettingsShown = current.phase == GameViewModel.GamePhase.Paused
+                val isWinShown = current.phase == GameViewModel.GamePhase.Result
+                if (!isWinShown && !isSettingsShown) {
+                    viewModel.pauseAndOpenSettings()
                 }
             }
         }
@@ -114,7 +110,10 @@ fun GameScreen(
 
     LaunchedEffect(state.phase) {
         when (state.phase) {
-            GameViewModel.GamePhase.Running -> audio.resumeMusic()
+            GameViewModel.GamePhase.Running -> {
+                audio.playGameMusic()
+                audio.resumeMusic()
+            }
             GameViewModel.GamePhase.Paused -> audio.pauseMusic()
             GameViewModel.GamePhase.Result -> {
                 audio.stopMusic()
@@ -152,13 +151,17 @@ fun GameScreen(
     // ----------------------- Обработка Back -----------------------
     BackHandler {
         when (state.phase) {
-            GameViewModel.GamePhase.Running -> viewModel.pause()
-            GameViewModel.GamePhase.Paused -> viewModel.resume()
-            GameViewModel.GamePhase.Result, GameViewModel.GamePhase.Intro -> {
+            GameViewModel.GamePhase.Running -> viewModel.pauseAndOpenSettings()
+            GameViewModel.GamePhase.Result -> {
                 val finalScore = state.score
                 viewModel.exitToMenu()
                 onExitToMenu(finalScore)
             }
+            GameViewModel.GamePhase.Intro -> {
+                viewModel.exitToMenu()
+                onExitToMenu(state.score)
+            }
+            GameViewModel.GamePhase.Paused -> Unit
         }
     }
 
@@ -234,7 +237,7 @@ fun GameScreen(
             if (state.phase == GameViewModel.GamePhase.Intro) {
                 IntroOverlay(
                     onStart = {
-                        viewModel.resume()
+                        viewModel.startGame()
                     }
                 )
             }
