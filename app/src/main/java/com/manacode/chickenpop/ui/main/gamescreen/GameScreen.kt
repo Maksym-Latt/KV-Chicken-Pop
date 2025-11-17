@@ -195,7 +195,6 @@ fun GameScreen(
                     .padding(
                         start = 20.dp,
                         end = 20.dp,
-                        top = 16.dp,
                         bottom = 16.dp + foregroundChickenHeightDp
                     ),
                 verticalArrangement = Arrangement.Top

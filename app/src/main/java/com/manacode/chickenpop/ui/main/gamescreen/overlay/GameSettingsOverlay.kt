@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -78,7 +81,8 @@ fun GameSettingsOverlay(
         SecondaryBackButton(
             onClick = onResume,
             modifier = Modifier
-                .padding(start = 16.dp, top = 24.dp)
+                .windowInsetsPadding(WindowInsets.displayCutout)
+                .padding(start = 20.dp)
         )
 
         Box(
@@ -87,8 +91,8 @@ fun GameSettingsOverlay(
                 .width(300.dp)
                 .wrapContentHeight()
                 .clip(cardShape)
-                .background(panelGrad)                       // было Color(0xFF3DE3F8)
-                .border(2.dp, borderColor, cardShape)        // было Color(0xFF101010)
+                .background(panelGrad)
+                .border(2.dp, borderColor, cardShape)
                 .padding(vertical = 20.dp, horizontal = 16.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
