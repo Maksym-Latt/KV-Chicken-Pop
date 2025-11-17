@@ -69,7 +69,7 @@ fun SettingsOverlay(
         SecondaryBackButton(
             onClick = onClose,
             modifier = Modifier
-                .padding(start = 16.dp, top = 24.dp)
+                .padding(horizontal = 24.dp, vertical = 24.dp)
         )
 
         Box(
