@@ -79,6 +79,10 @@ class GameViewModel : ViewModel() {
         engine.pause()
     }
 
+    fun pauseAndOpenSettings() {
+        pause()
+    }
+
     fun resume() {
         if (_state.value.phase != GamePhase.Paused) return
         engine.resume()
