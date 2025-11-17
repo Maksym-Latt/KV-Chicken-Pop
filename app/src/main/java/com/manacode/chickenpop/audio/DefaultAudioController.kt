@@ -19,6 +19,7 @@ class DefaultAudioController @Inject constructor(
     private var soundVolume: Float = settingsRepository.getSoundVolume().toVolume()
 
     private var currentMusic: MusicTrack? = null
+    private var currentSound: SoundCue? = null
     private var musicPlayer: MediaPlayer? = null
     private var sfxPlayer: MediaPlayer? = null
 
@@ -46,16 +47,26 @@ class DefaultAudioController @Inject constructor(
     }
 
     override fun resumeMusic() {
-        musicPlayer?.start()
+        musicPlayer?.let { player ->
+            currentMusic?.let { track -> player.setVolume(track.normalizedMusicVolume(), track.normalizedMusicVolume()) }
+            player.start()
+        }
     }
 
     override fun setMusicVolume(percent: Int) {
         musicVolume = percent.toVolume()
-        musicPlayer?.setVolume(musicVolume, musicVolume)
+        currentMusic?.let { track ->
+            val adjusted = track.normalizedMusicVolume()
+            musicPlayer?.setVolume(adjusted, adjusted)
+        }
     }
 
     override fun setSoundVolume(percent: Int) {
         soundVolume = percent.toVolume()
+        currentSound?.let { cue ->
+            val adjusted = cue.normalizedSoundVolume()
+            sfxPlayer?.setVolume(adjusted, adjusted)
+        }
         // новый звук возьмёт уже обновлённое значение
     }
 
@@ -79,7 +90,8 @@ class DefaultAudioController @Inject constructor(
 
     private fun playMusic(track: MusicTrack) {
         if (currentMusic == track && musicPlayer != null) {
-            musicPlayer?.setVolume(musicVolume, musicVolume)
+            val adjusted = track.normalizedMusicVolume()
+            musicPlayer?.setVolume(adjusted, adjusted)
             if (musicPlayer?.isPlaying != true) {
                 musicPlayer?.start()
             }
@@ -90,7 +102,8 @@ class DefaultAudioController @Inject constructor(
 
         musicPlayer = MediaPlayer.create(context, track.resId).apply {
             isLooping = true
-            setVolume(musicVolume, musicVolume)
+            val adjusted = track.normalizedMusicVolume()
+            setVolume(adjusted, adjusted)
             setOnCompletionListener(null)
             start()
         }
@@ -104,18 +117,27 @@ class DefaultAudioController @Inject constructor(
         }
         sfxPlayer = MediaPlayer.create(context, effect.resId).apply {
             isLooping = false
-            setVolume(soundVolume, soundVolume)
+            val adjusted = effect.normalizedSoundVolume()
+            setVolume(adjusted, adjusted)
             setOnCompletionListener {
                 it.release()
                 if (sfxPlayer === it) {
                     sfxPlayer = null
+                    currentSound = null
                 }
             }
             start()
         }
+        currentSound = effect
     }
 
     private fun Int.toVolume(): Float = (this.coerceIn(0, 100) / 100f).coerceIn(0f, 1f)
+
+    private fun MusicTrack.normalizedMusicVolume(): Float = musicVolume.adjustWith(MUSIC_NORMALIZATION[this])
+
+    private fun SoundCue.normalizedSoundVolume(): Float = soundVolume.adjustWith(SOUND_NORMALIZATION[this])
+
+    private fun Float.adjustWith(gain: Float?): Float = (this * (gain ?: 1f)).coerceIn(0f, 1f)
 
     // ---------------------- ENUMS ПОД res/raw ----------------------
 
@@ -135,5 +157,19 @@ class DefaultAudioController @Inject constructor(
         RareChicken(R.raw.sfx_rare_chicken),
 
         ChickenEscape(R.raw.sfx_chicken_escape)
+    }
+
+    companion object {
+        private val MUSIC_NORMALIZATION = mapOf(
+            MusicTrack.MenuTheme to 0.8f,
+            MusicTrack.GameLoop to 0.75f,
+        )
+
+        private val SOUND_NORMALIZATION = mapOf(
+            SoundCue.VictoryFanfare to 0.7f,
+            SoundCue.ChickenHit to 0.6f,
+            SoundCue.RareChicken to 0.6f,
+            SoundCue.ChickenEscape to 0.6f,
+        )
     }
 }
