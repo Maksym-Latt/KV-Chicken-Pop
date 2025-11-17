@@ -617,7 +617,7 @@ public final class DaggerChickenPopApp_HiltComponents_SingletonC {
       public T get() {
         switch (id) {
           case 0: // com.manacode.chickenpop.audio.DefaultAudioController 
-          return (T) new DefaultAudioController(singletonCImpl.settingsRepositoryImplProvider.get());
+          return (T) new DefaultAudioController(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.settingsRepositoryImplProvider.get());
 
           case 1: // com.manacode.chickenpop.data.settings.SettingsRepositoryImpl 
           return (T) new SettingsRepositoryImpl(singletonCImpl.provideSharedPreferencesProvider.get());

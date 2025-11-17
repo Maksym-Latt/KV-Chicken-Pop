@@ -1,5 +1,6 @@
 package com.manacode.chickenpop.audio;
 
+import android.content.Context;
 import com.manacode.chickenpop.data.settings.SettingsRepository;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -9,7 +10,7 @@ import javax.annotation.processing.Generated;
 import javax.inject.Provider;
 
 @ScopeMetadata("javax.inject.Singleton")
-@QualifierMetadata
+@QualifierMetadata("dagger.hilt.android.qualifiers.ApplicationContext")
 @DaggerGenerated
 @Generated(
     value = "dagger.internal.codegen.ComponentProcessor",
@@ -22,23 +23,28 @@ import javax.inject.Provider;
     "KotlinInternalInJava"
 })
 public final class DefaultAudioController_Factory implements Factory<DefaultAudioController> {
+  private final Provider<Context> contextProvider;
+
   private final Provider<SettingsRepository> settingsRepositoryProvider;
 
-  public DefaultAudioController_Factory(Provider<SettingsRepository> settingsRepositoryProvider) {
+  public DefaultAudioController_Factory(Provider<Context> contextProvider,
+      Provider<SettingsRepository> settingsRepositoryProvider) {
+    this.contextProvider = contextProvider;
     this.settingsRepositoryProvider = settingsRepositoryProvider;
   }
 
   @Override
   public DefaultAudioController get() {
-    return newInstance(settingsRepositoryProvider.get());
+    return newInstance(contextProvider.get(), settingsRepositoryProvider.get());
   }
 
-  public static DefaultAudioController_Factory create(
+  public static DefaultAudioController_Factory create(Provider<Context> contextProvider,
       Provider<SettingsRepository> settingsRepositoryProvider) {
-    return new DefaultAudioController_Factory(settingsRepositoryProvider);
+    return new DefaultAudioController_Factory(contextProvider, settingsRepositoryProvider);
   }
 
-  public static DefaultAudioController newInstance(SettingsRepository settingsRepository) {
-    return new DefaultAudioController(settingsRepository);
+  public static DefaultAudioController newInstance(Context context,
+      SettingsRepository settingsRepository) {
+    return new DefaultAudioController(context, settingsRepository);
   }
 }

@@ -43,7 +43,7 @@ fun IntroOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xcd000000))
+            .background(Color(0xe5000000))
     ) {
 
         Row(
@@ -84,7 +84,7 @@ fun IntroOverlay(
                     Text(
                         text = "Closed",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color(0xFF4E2C10),
+                            color = Color(0xffffffff),
                             textAlign = TextAlign.Center
                         )
                     )
@@ -100,7 +100,7 @@ fun IntroOverlay(
                     Text(
                         text = "Chicken inside",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color(0xFF4E2C10),
+                            color = Color(0xffffffff),
                             textAlign = TextAlign.Center
                         )
                     )
@@ -116,7 +116,7 @@ fun IntroOverlay(
                     Text(
                         text = "Escaped",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            color = Color(0xFF4E2C10),
+                            color = Color(0xffffffff),
                             textAlign = TextAlign.Center
                         )
                     )
@@ -129,7 +129,7 @@ fun IntroOverlay(
                         "Tap the chicken as soon as it pops out,\n" +
                         "before it hides again!",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color(0xFF704117),
+                    color = Color(0xffffffff),
                     textAlign = TextAlign.Center,
                     lineHeight = 22.sp
                 ),
@@ -140,7 +140,7 @@ fun IntroOverlay(
             Text(
                 text = "The faster you react — the more points you gain\nand the higher the speed level goes!",
                 style = MaterialTheme.typography.bodySmall.copy(
-                    color = Color(0xFF8A5222),
+                    color = Color(0xffffffff),
                     textAlign = TextAlign.Center,
                     lineHeight = 18.sp
                 ),

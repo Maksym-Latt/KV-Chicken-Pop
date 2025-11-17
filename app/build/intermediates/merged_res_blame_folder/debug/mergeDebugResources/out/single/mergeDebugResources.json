@@ -16,8 +16,16 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\bg_menu.jpg"
     },
     {
+        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_victory_fanfare.mp3.flat",
+        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_victory_fanfare.mp3"
+    },
+    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-hdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-hdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xxxhdpi\\ic_launcher_foreground.webp"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
@@ -28,6 +36,14 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xxhdpi\\ic_launcher.webp"
     },
     {
+        "merged": "com.manacode.chickenpop.app-debug-60:/raw_menu_theme.mp3.flat",
+        "source": "com.manacode.chickenpop.app-main-62:/raw/menu_theme.mp3"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-hdpi\\ic_launcher_foreground.webp"
+    },
+    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\xml_backup_rules.xml.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\xml\\backup_rules.xml"
     },
@@ -36,20 +52,40 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-mdpi\\ic_launcher_round.webp"
     },
     {
+        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_chicken_hit.mp3.flat",
+        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_chicken_hit.mp3"
+    },
+    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_chicken.png.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\chicken.png"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\font_poppins_extra_bold.ttf.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\font\\poppins_extra_bold.ttf"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xxhdpi\\ic_launcher_foreground.webp"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_title.png.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\title.png"
     },
     {
-        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_tile_house.png.flat",
-        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\tile_house.png"
+        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_rare_chicken.mp3.flat",
+        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_rare_chicken.mp3"
     },
     {
-        "merged": "com.manacode.chickenpop.app-debug-60:/font_poppins_extra_bold.ttf.flat",
-        "source": "com.manacode.chickenpop.app-main-62:/font/poppins_extra_bold.ttf"
+        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_chicken_escape.mp3.flat",
+        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_chicken_escape.mp3"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_tile_house.png.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\tile_house.png"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_cloud.png.flat",
@@ -68,6 +104,10 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xhdpi\\ic_launcher.webp"
     },
     {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-mdpi\\ic_launcher_foreground.webp"
+    },
+    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_bg_game.jpg.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\bg_game.jpg"
     },
@@ -76,12 +116,12 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\tile_house_with_chicken.png"
     },
     {
-        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_ic_launcher_foreground.xml.flat",
-        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\ic_launcher_foreground.xml"
-    },
-    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xxxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\ic_launcher_foreground.xml"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-mdpi_ic_launcher.webp.flat",
@@ -92,8 +132,8 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\chicken_happy.png"
     },
     {
-        "merged": "com.manacode.chickenpop.app-debug-60:/font_tillana_extra_bold.ttf.flat",
-        "source": "com.manacode.chickenpop.app-main-62:/font/tillana_extra_bold.ttf"
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\font_tillana_extra_bold.ttf.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\font\\tillana_extra_bold.ttf"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
@@ -102,6 +142,10 @@
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_tile_house_outside_chicken.png.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\tile_house_outside_chicken.png"
+    },
+    {
+        "merged": "com.manacode.chickenpop.app-debug-60:/raw_game_loop.mp3.flat",
+        "source": "com.manacode.chickenpop.app-main-62:/raw/game_loop.mp3"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",

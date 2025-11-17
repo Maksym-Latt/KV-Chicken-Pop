@@ -30,7 +30,7 @@ internal fun OrangeSlider(
     modifier: Modifier = Modifier
 ) {
     val clamped = value.coerceIn(0, 100)
-    val heightDp = 36.dp
+    val heightDp = 30.dp
     val radius by remember { mutableStateOf(heightDp / 2) }
 
     var widthPx by remember { mutableStateOf(1f) }

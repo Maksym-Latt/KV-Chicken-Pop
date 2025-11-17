@@ -137,7 +137,7 @@ fun GameSettingsOverlay(
                 ) {
                     SecondaryIconButton(
                         onClick = onRetry,
-                        modifier = Modifier.size(64.dp)
+                        modifier = Modifier
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
@@ -149,7 +149,7 @@ fun GameSettingsOverlay(
 
                     SecondaryIconButton(
                         onClick = onHome,
-                        modifier = Modifier.size(60.dp)
+                        modifier = Modifier
                     ) {
                         Icon(
                             imageVector = Icons.Default.Home,

@@ -60,6 +60,7 @@ int color androidx_core_secondary_text_default_material_light 0x7f040001
 int color black 0x7f040002
 int color call_notification_answer_color 0x7f040003
 int color call_notification_decline_color 0x7f040004
+int color ic_launcher_background 0x7f04000f
 int color notification_action_color_filter 0x7f040005
 int color notification_icon_bg_color 0x7f040006
 int color purple_200 0x7f040007
@@ -240,7 +241,14 @@ int layout notification_template_icon_group 0x7f090006
 int layout notification_template_part_chronometer 0x7f090007
 int layout notification_template_part_time 0x7f090008
 int mipmap ic_launcher 0x7f0a0000
+int mipmap ic_launcher_foreground 0x7f0a0002
 int mipmap ic_launcher_round 0x7f0a0001
+int raw game_loop 0x7f100000
+int raw menu_theme 0x7f100001
+int raw sfx_chicken_escape 0x7f100002
+int raw sfx_chicken_hit 0x7f100003
+int raw sfx_rare_chicken 0x7f100004
+int raw sfx_victory_fanfare 0x7f100005
 int string androidx_startup 0x7f0b0000
 int string app_name 0x7f0b0001
 int string autofill 0x7f0b0002

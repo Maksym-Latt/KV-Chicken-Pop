@@ -87,7 +87,7 @@ fun GradientOutlinedTextShort(
     text: String,
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 44.sp,
-    strokeWidth: Float = 9f,
+    strokeWidth: Float = 3f,
     gradientColors: List<Color> = listOf(Color(0xFFFFA726), Color(0xFFFF6F00)),
     textAlign: TextAlign = TextAlign.Start,
     horizontalPadding: Dp = 0.dp

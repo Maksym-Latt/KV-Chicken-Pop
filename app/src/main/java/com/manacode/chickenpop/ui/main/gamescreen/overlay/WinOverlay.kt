@@ -55,7 +55,11 @@ fun WinOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xcd000000)),
+            .background(Color(0xcd000000))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {}
     ) {
 
         // ----------------------- Share button (top right) -----------------------
