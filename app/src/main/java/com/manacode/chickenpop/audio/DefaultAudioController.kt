@@ -67,7 +67,6 @@ class DefaultAudioController @Inject constructor(
             val adjusted = cue.normalizedSoundVolume()
             sfxPlayer?.setVolume(adjusted, adjusted)
         }
-        // новый звук возьмёт уже обновлённое значение
     }
 
     override fun playGameWin() {
@@ -166,10 +165,10 @@ class DefaultAudioController @Inject constructor(
         )
 
         private val SOUND_NORMALIZATION = mapOf(
-            SoundCue.VictoryFanfare to 0.7f,
-            SoundCue.ChickenHit to 0.6f,
-            SoundCue.RareChicken to 0.6f,
-            SoundCue.ChickenEscape to 0.6f,
+            SoundCue.VictoryFanfare to 0.9f,
+            SoundCue.ChickenHit to 0.9f,
+            SoundCue.RareChicken to 0.9f,
+            SoundCue.ChickenEscape to 0.9f,
         )
     }
 }

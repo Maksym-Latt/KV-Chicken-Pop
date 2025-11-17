@@ -16,10 +16,6 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\bg_menu.jpg"
     },
     {
-        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_victory_fanfare.mp3.flat",
-        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_victory_fanfare.mp3"
-    },
-    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-hdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-hdpi\\ic_launcher.webp"
     },
@@ -32,16 +28,24 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xhdpi\\ic_launcher_round.webp"
     },
     {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\raw_sfx_chicken_escape.mp3.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\raw\\sfx_chicken_escape.mp3"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\raw_sfx_chicken_hit.mp3.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\raw\\sfx_chicken_hit.mp3"
+    },
+    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xxhdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-xxhdpi\\ic_launcher.webp"
     },
     {
-        "merged": "com.manacode.chickenpop.app-debug-60:/raw_menu_theme.mp3.flat",
-        "source": "com.manacode.chickenpop.app-main-62:/raw/menu_theme.mp3"
-    },
-    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-hdpi_ic_launcher_foreground.webp.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-hdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\raw_menu_theme.mp3.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\raw\\menu_theme.mp3"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\xml_backup_rules.xml.flat",
@@ -52,8 +56,8 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\mipmap-mdpi\\ic_launcher_round.webp"
     },
     {
-        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_chicken_hit.mp3.flat",
-        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_chicken_hit.mp3"
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\raw_game_loop.mp3.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\raw\\game_loop.mp3"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_chicken.png.flat",
@@ -76,12 +80,8 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\drawable\\title.png"
     },
     {
-        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_rare_chicken.mp3.flat",
-        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_rare_chicken.mp3"
-    },
-    {
-        "merged": "com.manacode.chickenpop.app-debug-60:/raw_sfx_chicken_escape.mp3.flat",
-        "source": "com.manacode.chickenpop.app-main-62:/raw/sfx_chicken_escape.mp3"
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\raw_sfx_victory_fanfare.mp3.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\raw\\sfx_victory_fanfare.mp3"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\drawable_tile_house.png.flat",
@@ -134,6 +134,10 @@
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\font_tillana_extra_bold.ttf.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\font\\tillana_extra_bold.ttf"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\raw_sfx_rare_chicken.mp3.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-main-62:\\raw\\sfx_rare_chicken.mp3"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.11.1\\com.manacode.chickenpop.app-debug-60:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
