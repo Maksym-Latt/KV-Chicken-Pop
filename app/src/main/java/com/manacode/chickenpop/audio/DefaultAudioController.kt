@@ -63,6 +63,18 @@ class DefaultAudioController @Inject constructor(
         playSound(SoundCue.VictoryFanfare)
     }
 
+    override fun playChickenHit() {
+        playSound(SoundCue.ChickenHit)
+    }
+
+    override fun playRareChicken() {
+        playSound(SoundCue.RareChicken)
+    }
+
+    override fun playChickenEscape() {
+        playSound(SoundCue.ChickenEscape)
+    }
+
     // ---------------------- INTERNAL IMPLEMENTATION ----------------------
 
     private fun playMusic(track: MusicTrack) {
