@@ -141,6 +141,7 @@ fun GameScreen(
             if (recentHitIds.contains(id)) {
                 recentHitIds.remove(id)
             } else {
+                audio.playChickenEscape()
                 triggerEffect(slot, EffectType.Escape)
             }
         }
@@ -212,8 +213,10 @@ fun GameScreen(
                                     recentHitIds += outcome.chickenId
                                     val effectType =
                                         if (outcome.type == GameEngine.ChickenType.Rare) {
+                                            audio.playRareChicken()
                                             EffectType.Rare
                                         } else {
+                                            audio.playChickenHit()
                                             EffectType.Hit
                                         }
                                     triggerEffect(slot, effectType)
