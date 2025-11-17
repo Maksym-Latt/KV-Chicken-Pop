@@ -3,6 +3,10 @@ package com.manacode.chickenpop.ui.main.gamescreen
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,17 +19,23 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +61,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Icon
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -59,11 +74,16 @@ import com.manacode.chickenpop.audio.rememberAudioController
 import com.manacode.chickenpop.R
 import com.manacode.chickenpop.game.GameEngine
 import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedTextShort
+import com.manacode.chickenpop.ui.main.component.SecondaryIconButton
 import com.manacode.chickenpop.ui.main.gamescreen.GameViewModel.TapOutcome
 import com.manacode.chickenpop.ui.main.gamescreen.overlay.GameSettingsOverlay
+import com.manacode.chickenpop.ui.main.gamescreen.overlay.IntroOverlay
 import com.manacode.chickenpop.ui.main.gamescreen.overlay.WinOverlay
+import kotlinx.coroutines.NonCancellable.isActive
 import kotlinx.coroutines.delay
 
+// ======================= 🐣 ЭКРАН ИГРЫ =======================
 @Composable
 fun GameScreen(
     onExitToMenu: (Int) -> Unit,
@@ -73,6 +93,7 @@ fun GameScreen(
     val audio = rememberAudioController()
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    // ----------------------- Старт игры и музыка -----------------------
     LaunchedEffect(Unit) {
         viewModel.startGame()
         audio.playGameMusic()
@@ -103,6 +124,7 @@ fun GameScreen(
         }
     }
 
+    // ----------------------- Эффекты на клетках -----------------------
     val effects = remember { mutableStateListOf<CellEffect>() }
     var effectCounter by remember { mutableLongStateOf(0L) }
     var previousChickens by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
@@ -127,6 +149,7 @@ fun GameScreen(
         previousChickens = current
     }
 
+    // ----------------------- Обработка Back -----------------------
     BackHandler {
         when (state.phase) {
             GameViewModel.GamePhase.Running -> viewModel.pause()
@@ -139,15 +162,25 @@ fun GameScreen(
         }
     }
 
+    // ----------------------- Резерв под нижнюю курицу -----------------------
+    var foregroundChickenHeightDp by remember { mutableStateOf(0.dp) }
+
     Surface(color = Color(0xFFFFF4D9)) {
         Box(modifier = Modifier.fillMaxSize()) {
-            GameBackground()
-            BackgroundClouds()
 
+            GameBackground()
+
+            // =================== ОСНОВНОЙ КОНТЕНТ (HUD + GRID) ===================
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 16.dp,
+                        bottom = 16.dp + foregroundChickenHeightDp
+                    ),
+                verticalArrangement = Arrangement.Top
             ) {
                 TopHud(
                     phase = state.phase,
@@ -161,31 +194,52 @@ fun GameScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                GameBoard(
-                    chickens = state.chickens,
-                    effects = effects,
-                    onTapSlot = { slot ->
-                        when (val outcome = viewModel.tap(slot)) {
-                            is TapOutcome.Hit -> {
-                                recentHitIds += outcome.chickenId
-                                val effectType = if (outcome.type == GameEngine.ChickenType.Rare) {
-                                    EffectType.Rare
-                                } else {
-                                    EffectType.Hit
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    GameBoard(
+                        chickens = state.chickens,
+                        effects = effects,
+                        onTapSlot = { slot ->
+                            when (val outcome = viewModel.tap(slot)) {
+                                is TapOutcome.Hit -> {
+                                    recentHitIds += outcome.chickenId
+                                    val effectType =
+                                        if (outcome.type == GameEngine.ChickenType.Rare) {
+                                            EffectType.Rare
+                                        } else {
+                                            EffectType.Hit
+                                        }
+                                    triggerEffect(slot, effectType)
                                 }
-                                triggerEffect(slot, effectType)
+                                TapOutcome.Miss -> triggerEffect(slot, EffectType.Miss)
                             }
-                            TapOutcome.Miss -> triggerEffect(slot, EffectType.Miss)
-                        }
-                    },
-                    onEffectConsumed = { effect -> effects.remove(effect) }
-                )
-
-                Spacer(modifier = Modifier.height(96.dp))
+                        },
+                        onEffectConsumed = { effect -> effects.remove(effect) }
+                    )
+                }
             }
 
-            GameForegroundChicken()
+            // =================== Нижняя курица ===================
+            GameForegroundChicken(
+                onMeasuredHeight = { measuredHeight ->
+                    foregroundChickenHeightDp = measuredHeight
+                }
+            )
 
+            // =================== INTRO OVERLAY ===================
+            if (state.phase == GameViewModel.GamePhase.Intro) {
+                IntroOverlay(
+                    onStart = {
+                        viewModel.resume()
+                    }
+                )
+            }
+
+            // =================== PAUSE OVERLAY ===================
             if (state.phase == GameViewModel.GamePhase.Paused) {
                 GameSettingsOverlay(
                     onResume = viewModel::resume,
@@ -198,10 +252,10 @@ fun GameScreen(
                 )
             }
 
+            // =================== RESULT OVERLAY ===================
             if (state.phase == GameViewModel.GamePhase.Result) {
                 WinOverlay(
                     score = state.score,
-                    combo = state.bestCombo,
                     onRetry = viewModel::retry,
                     onHome = {
                         val finalScore = state.score
@@ -214,10 +268,14 @@ fun GameScreen(
     }
 }
 
+
+
 private data class CellEffect(val id: Long, val slot: Int, val type: EffectType)
 
 private enum class EffectType { Hit, Miss, Escape, Rare }
 
+
+// ========================= 🔼 TOP HUD =========================
 @Composable
 private fun TopHud(
     phase: GameViewModel.GamePhase,
@@ -229,184 +287,136 @@ private fun TopHud(
     onPause: () -> Unit,
 ) {
     val canPause = phase == GameViewModel.GamePhase.Running
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .windowInsetsPadding(WindowInsets.displayCutout),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // --------- ВЕРХНИЙ РЯД: кнопка слева, текст справа ---------
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PauseButton(
-                enabled = canPause,
-                onClick = onPause,
-                modifier = Modifier.size(60.dp)
-            )
+            SecondaryIconButton(
+                onClick = { if (canPause) onPause() },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Pause,
+                    contentDescription = "Pause",
+                    tint = Color.White,
+                    modifier = Modifier.fillMaxSize(0.8f)
+                )
+            }
 
-            Spacer(modifier = Modifier.width(14.dp))
+            // Этот Spacer с weight толкает ScoreBoard в самый правый край
+            Spacer(modifier = Modifier.weight(1f))
 
             ScoreBoard(
                 score = score,
                 timeSeconds = timeSeconds,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.wrapContentWidth(Alignment.End)
             )
         }
 
+        Spacer(Modifier.height(20.dp))
+
+        // --------- СТРОКА СТАТОВ СПРАВА ---------
         StatusRow(
             combo = combo,
             speed = speed,
-            rareHits = rareHits
+            rareHits = rareHits,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
 
-@Composable
-private fun PauseButton(enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val interaction = remember { MutableInteractionSource() }
-    val shape = CircleShape
-    val background = if (enabled) {
-        Brush.verticalGradient(listOf(Color(0xFFFFD27F), Color(0xFFE6801C)))
-    } else {
-        Brush.verticalGradient(listOf(Color(0xFFE4C7A4), Color(0xFFB68A56)))
-    }
-    Box(
-        modifier = modifier
-            .shadow(18.dp, shape, clip = false, spotColor = Color(0x8843210C))
-            .clip(shape)
-            .background(background)
-            .border(2.dp, Color(0xFF5A2A09), shape)
-            .clickable(
-                enabled = enabled,
-                interactionSource = interaction,
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Pause,
-            contentDescription = "Pause",
-            tint = Color.White,
-            modifier = Modifier.fillMaxSize(0.52f)
-        )
-    }
-}
 
+// ========================= 🎯 SCORE + TIME =========================
 @Composable
-private fun ScoreBoard(score: Int, timeSeconds: Int, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(26.dp)
-    val safeScore = score.coerceAtLeast(0)
-    val scoreText = safeScore.toString().padStart(4, '0')
-    val timeFormatted = run {
-        val safeSeconds = timeSeconds.coerceAtLeast(0)
-        val minutes = safeSeconds / 60
-        val seconds = safeSeconds % 60
-        String.format("%d:%02d", minutes, seconds)
-    }
-
-    Box(
-        modifier = modifier
-            .shadow(16.dp, shape, clip = false, spotColor = Color(0x553E1D0A))
-            .clip(shape)
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFFFB347), Color(0xFFB46018))
-                )
-            )
-            .border(2.dp, Color(0xFF3E1D0A), shape)
-            .padding(horizontal = 22.dp, vertical = 14.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = "Score $scoreText",
-                color = Color(0xFFFFF3D9),
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                text = "Time $timeFormatted",
-                color = Color(0xFFFFF3D9),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatusRow(combo: Int, speed: Int, rareHits: Int) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        InfoBadge(
-            label = "Combo",
-            value = "x$combo",
-            highlight = combo >= 2,
-            modifier = Modifier.weight(1f)
-        )
-        InfoBadge(
-            label = "Speed",
-            value = (speed + 1).toString(),
-            highlight = speed > 0,
-            modifier = Modifier.weight(1f)
-        )
-        InfoBadge(
-            label = "Rare",
-            value = rareHits.toString(),
-            highlight = rareHits > 0,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun InfoBadge(
-    label: String,
-    value: String,
-    highlight: Boolean,
+fun ScoreBoard(
+    score: Int,
+    timeSeconds: Int,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(18.dp)
-    val gradient = if (highlight) {
-        Brush.verticalGradient(listOf(Color(0xFFFFC56C), Color(0xFFB45B1F)))
-    } else {
-        Brush.verticalGradient(listOf(Color(0xFFECD7BC), Color(0xFFC59A6A)))
+    val scoreText = score.coerceAtLeast(0).toString().padStart(4, '0')
+    val timeFormatted = remember(timeSeconds) {
+        val s = timeSeconds.coerceAtLeast(0)
+        "%d:%02d".format(s / 60, s % 60)
     }
-    val labelColor = if (highlight) Color(0xFF3E1F0A) else Color(0xFF6B4A2F)
-    val valueColor = if (highlight) Color.White else Color(0xFF3E2A1A)
 
-    Box(
+    Column(
+        modifier = modifier,                   // сюда приходит wrapContentWidth(End)
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalAlignment = Alignment.End    // выравниваем дочерние по правому краю
+    ) {
+        GradientOutlinedTextShort(
+            text = "Score: $scoreText",
+            fontSize = 24.sp,
+            strokeWidth = 7f,
+            textAlign = TextAlign.End,         // текст тоже вправо
+            horizontalPadding = 0.dp
+        )
+
+        GradientOutlinedTextShort(
+            text = "Time: $timeFormatted",
+            fontSize = 24.sp,
+            strokeWidth = 6f,
+            textAlign = TextAlign.End,
+            horizontalPadding = 0.dp
+        )
+    }
+}
+
+@Composable
+fun StatusRow(
+    combo: Int,
+    speed: Int,
+    rareHits: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
         modifier = modifier
-            .clip(shape)
-            .background(gradient)
-            .border(2.dp, Color(0xFF4F250C), shape)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .fillMaxWidth()
+            .padding(top = 6.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        StatusTextBlock(
+            text = "Combo x$combo",
+            modifier = Modifier.weight(1f)
+        )
+
+        StatusTextBlock(
+            text = "Speed ${speed + 1}",
+            modifier = Modifier.weight(1f)
+        )
+
+        StatusTextBlock(
+            text = "Rare $rareHits",
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+// ========================= 🧱 ОБЁРТКА ДЛЯ КРАТКИХ ТЕКСТОВ =========================
+@Composable
+private fun StatusTextBlock(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.padding(horizontal = 20.dp),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = label,
-                color = labelColor,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = value,
-                color = valueColor,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-        }
+        GradientOutlinedTextShort(
+            text = text,
+            fontSize = 14.sp,
+            strokeWidth = 6f,
+            textAlign = TextAlign.Center,
+            horizontalPadding = 0.dp
+        )
     }
 }
 
@@ -551,20 +561,61 @@ private fun EffectOverlay(effect: CellEffect, onEffectConsumed: (CellEffect) -> 
                 )
             }
         }
+
         EffectType.Miss, EffectType.Escape -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Canvas(modifier = Modifier.size(72.dp)) {
-                    val base = if (effect.type == EffectType.Miss) Color(0xFFB0BEC5) else Color(0xFFC8E6C9)
-                    repeat(4) { index ->
-                        val offsetX = size.width / 2f + (index - 1.5f) * size.width * 0.15f
-                        val offsetY = size.height / 2f + (index % 2 - 0.5f) * size.height * 0.12f
-                        drawCircle(
-                            color = base.copy(alpha = 0.6f - index * 0.1f),
-                            radius = size.minDimension * (0.32f + index * 0.04f),
-                            center = Offset(offsetX, offsetY)
+            val cloudPainter = painterResource(R.drawable.cloud)
+
+            val alphaAnim by animateFloatAsState(
+                targetValue = if (isActive) 1f else 0f,
+                animationSpec = tween(400, easing = LinearOutSlowInEasing),
+                label = "cloudAlpha"
+            )
+
+            val scaleAnim by animateFloatAsState(
+                targetValue = if (isActive) 1f else 0.6f,
+                animationSpec = tween(400, easing = FastOutSlowInEasing),
+                label = "cloudScale"
+            )
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = cloudPainter,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(84.dp)
+                        .graphicsLayer(
+                            alpha = alphaAnim,
+                            scaleX = scaleAnim,
+                            scaleY = scaleAnim
                         )
-                    }
-                }
+                )
+                Image(
+                    painter = cloudPainter,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(62.dp)
+                        .offset(x = (-16).dp, y = (-10).dp)
+                        .graphicsLayer(
+                            alpha = alphaAnim * 0.8f,
+                            scaleX = scaleAnim * 0.9f,
+                            scaleY = scaleAnim * 0.9f
+                        )
+                )
+                Image(
+                    painter = cloudPainter,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(52.dp)
+                        .offset(x = 14.dp, y = 12.dp)
+                        .graphicsLayer(
+                            alpha = alphaAnim * 0.65f,
+                            scaleX = scaleAnim * 0.8f,
+                            scaleY = scaleAnim * 0.8f
+                        )
+                )
             }
         }
     }
@@ -581,51 +632,25 @@ private fun GameBackground() {
     )
 }
 
+
+// ======================= 🐔 ПЕРЕДНЯЯ КУРИЦА =======================
 @Composable
-private fun BoxScope.BackgroundClouds() {
-    Image(
-        painter = painterResource(id = R.drawable.cloud),
-        contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.TopStart)
-            .padding(start = 24.dp, top = 48.dp)
-            .fillMaxWidth(0.4f),
-        contentScale = ContentScale.Fit,
-        alpha = 0.9f
-    )
+private fun BoxScope.GameForegroundChicken(
+    onMeasuredHeight: (Dp) -> Unit
+) {
+    val density = LocalDensity.current
 
-    Image(
-        painter = painterResource(id = R.drawable.cloud),
-        contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.TopCenter)
-            .padding(top = 64.dp)
-            .fillMaxWidth(0.32f),
-        contentScale = ContentScale.Fit,
-        alpha = 0.85f
-    )
-
-    Image(
-        painter = painterResource(id = R.drawable.cloud),
-        contentDescription = null,
-        modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(end = 24.dp, top = 56.dp)
-            .fillMaxWidth(0.36f),
-        contentScale = ContentScale.Fit,
-        alpha = 0.8f
-    )
-}
-
-@Composable
-private fun BoxScope.GameForegroundChicken() {
     Image(
         painter = painterResource(id = R.drawable.chicken),
         contentDescription = null,
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .padding(bottom = 12.dp)
-            .fillMaxWidth(0.4f),
+            .fillMaxWidth(0.4f)
+            .onGloballyPositioned { coords ->
+                val heightDp = with(density) { coords.size.height.toDp() }
+                onMeasuredHeight(heightDp)
+            },
         contentScale = ContentScale.Fit
     )
 }

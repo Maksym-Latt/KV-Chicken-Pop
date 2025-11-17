@@ -1,14 +1,17 @@
 package com.manacode.chickenpop.ui.main.gamescreen.overlay
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -23,9 +26,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.manacode.chickenpop.R
 import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
 import com.manacode.chickenpop.ui.main.component.SecondaryBackButton
 import com.manacode.chickenpop.ui.main.component.StartPrimaryButton
@@ -34,69 +40,122 @@ import com.manacode.chickenpop.ui.main.component.StartPrimaryButton
 fun IntroOverlay(
     onStart: () -> Unit,
 ) {
-    // ----------------------- Colors -----------------------
-    val orangeTop = Color(0xffffc847)
-    val orangeBot = Color(0xff893c00)
-    val panelGrad = Brush.verticalGradient(listOf(orangeTop, orangeBot))
-    val cardShape = RoundedCornerShape(26.dp)
-
-    // ----------------------- Overlay -----------------------
-    BoxWithConstraints(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x99000000))
+            .background(Color(0xcd000000))
     ) {
-        val titleSize = if (maxWidth < 360.dp) 32.sp else 40.sp
-        val bodyLineHeight = if (maxWidth < 360.dp) 20.sp else 22.sp
-        val cardWidth = (maxWidth * 0.9f).coerceAtMost(360.dp)
 
-        // ----------------------- Card -----------------------
-        Box(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.End
+        ) { }
+
+        Column(
             modifier = Modifier
                 .align(Alignment.Center)
-                .width(cardWidth)
-                .wrapContentHeight()
+                .padding(horizontal = 32.dp, vertical = 36.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .graphicsLayer { shadowElevation = 18f }
+
+            // ---------------- TITLE ----------------
+            GradientOutlinedText(
+                text = "GET READY!",
+                fontSize = 40.sp,
+                gradientColors = listOf(Color(0xFFFFE3A1), Color(0xFFFF9D52))
             )
-            Box(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .clip(cardShape)
-                    .background(panelGrad)
-                    .padding(vertical = 22.dp, horizontal = 18.dp)
+
+            // ---------------- 3 CHICKEN STATES ----------------
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(top = 8.dp)
             ) {
-                // ----------------------- Content -----------------------
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    GradientOutlinedText(
-                        text = "Pop the chickens!",
-                        fontSize = titleSize,
-                        gradientColors = listOf(Color.White, Color.White)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(R.drawable.tile_house),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        contentScale = ContentScale.Crop
                     )
                     Text(
-                        text = "Tap the chickens before they hide. Chain hits to speed up and earn bonus points!",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color(0xFF704117),
-                            textAlign = TextAlign.Center,
-                            lineHeight = bodyLineHeight
-                        ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    StartPrimaryButton(
-                        text = "Let's go",
-                        onClick = onStart
+                        text = "Closed",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color(0xFF4E2C10),
+                            textAlign = TextAlign.Center
+                        )
                     )
                 }
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(R.drawable.tile_house_with_chicken),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                    Text(
+                        text = "Chicken inside",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color(0xFF4E2C10),
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                }
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Image(
+                        painter = painterResource(R.drawable.tile_house_outside_chicken),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        contentScale = ContentScale.Crop
+                    )
+                    Text(
+                        text = "Escaped",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = Color(0xFF4E2C10),
+                            textAlign = TextAlign.Center
+                        )
+                    )
+                }
+            }
+
+            // ---------------- EXPLANATION ----------------
+            Text(
+                text = "Watch the chicken coops.\n" +
+                        "Tap the chicken as soon as it pops out,\n" +
+                        "before it hides again!",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color(0xFF704117),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 22.sp
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            Text(
+                text = "The faster you react — the more points you gain\nand the higher the speed level goes!",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = Color(0xFF8A5222),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 18.sp
+                ),
+                textAlign = TextAlign.Center
+            )
+
+            // ---------------- BUTTON ----------------
+            Column(
+                modifier = Modifier.padding(top = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                StartPrimaryButton(
+                    text = "Start",
+                    onClick = onStart
+                )
             }
         }
     }

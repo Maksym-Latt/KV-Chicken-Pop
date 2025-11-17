@@ -17,7 +17,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,162 +40,82 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.manacode.chickenpop.R
+import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
+import com.manacode.chickenpop.ui.main.component.OrangePrimaryButton
+import com.manacode.chickenpop.ui.main.component.SecondaryIconButton
+import com.manacode.chickenpop.ui.main.component.StartPrimaryButton
 
 @Composable
 fun WinOverlay(
     score: Int,
-    combo: Int,
-    onRetry: () -> Unit,
     onHome: () -> Unit,
+    onRetry: () -> Unit
 ) {
+    // ----------------------- Overlay -----------------------
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xCC0B1B28), Color(0xE6000000))
-                )
-            ),
-        contentAlignment = Alignment.Center
+            .background(Color(0xcd000000)),
     ) {
-        val cardShape = RoundedCornerShape(36.dp)
+
+        // ----------------------- Share button (top right) -----------------------
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(24.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+
+        }
+
+        // ----------------------- Card -----------------------
         Column(
             modifier = Modifier
-                .padding(horizontal = 24.dp)
-                .clip(cardShape)
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFF244C6A), Color(0xFF162E44))
-                    )
-                )
-                .border(4.dp, Color(0xFF0A1A27), cardShape)
-                .padding(horizontal = 28.dp, vertical = 32.dp),
+                .align(Alignment.Center)
+                .padding(horizontal = 32.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(22.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "SCORE",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFFFEE9A)
-            )
-            Text(
-                text = score.toString(),
-                fontSize = 56.sp,
-                fontWeight = FontWeight.Black,
-                color = Color(0xFFFFC857)
+
+            // ----------------------- Title -----------------------
+            GradientOutlinedText(
+                text = "GAME OVER",
+                fontSize = 40.sp,
+                gradientColors = listOf(Color(0xFFFFE3A1), Color(0xFFFF9D52))
             )
 
-            AnimatedVisibility(visible = combo > 1, enter = fadeIn(), exit = fadeOut()) {
-                Text(
-                    text = "Best combo x$combo",
-                    color = Color(0xFFB3E5FC),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            // ----------------------- Chick -----------------------
+            Image(
+                painter = painterResource(id = R.drawable.chicken_happy),
+                contentDescription = null,
+                modifier = Modifier.size(320.dp),
+                contentScale = ContentScale.Fit
+            )
 
-            GameOverChicken()
+            // ----------------------- Subtitle -----------------------
+            GradientOutlinedText(
+                text = "You fed $score seeds!",
+                fontSize = 28.sp,
+                gradientColors = listOf(Color(0xFFFFF4C2), Color(0xFFFFC66E))
+            )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            // ----------------------- Buttons bottom -----------------------
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(top = 8.dp)
             ) {
-                GameOverButton(
-                    text = "Retry",
-                    colors = listOf(Color(0xFF9CE86D), Color(0xFF2F8D2D)),
-                    onClick = onRetry,
-                    modifier = Modifier.weight(1f)
-                )
-
-                GameOverButton(
+                OrangePrimaryButton(
                     text = "Menu",
-                    colors = listOf(Color(0xFFFFD27F), Color(0xFFDA7F21)),
-                    onClick = onHome,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.width(240.dp),
+                    onClick = onHome
+                )
+                StartPrimaryButton(
+                    text =  "Play again",
+                    onClick = onRetry
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun GameOverChicken() {
-    val stageShape = RoundedCornerShape(28.dp)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(220.dp)
-            .clip(stageShape)
-            .background(Color(0xFF0F2536).copy(alpha = 0.92f))
-            .border(4.dp, Color(0xFF06121D), stageShape),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.bg_menu),
-            contentDescription = null,
-            modifier = Modifier.matchParentSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.3f
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.tile_bg),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(72.dp),
-            contentScale = ContentScale.Crop,
-            alpha = 0.85f
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.chicken_happy),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth(0.6f),
-            contentScale = ContentScale.Fit
-        )
-    }
-}
-
-@Composable
-private fun GameOverButton(
-    text: String,
-    colors: List<Color>,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val shape = RoundedCornerShape(22.dp)
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val gradient = if (pressed) {
-        Brush.verticalGradient(colors.map { it.copy(alpha = 0.8f) })
-    } else {
-        Brush.verticalGradient(colors)
-    }
-
-    Box(
-        modifier = modifier
-            .shadow(20.dp, shape, clip = false, spotColor = Color(0x80210F04))
-            .clip(shape)
-            .background(gradient)
-            .border(3.dp, Color(0xFF3A1E08), shape)
-            .clickable(
-                interactionSource = interaction,
-                indication = null,
-                onClick = onClick
-            )
-            .padding(vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.ExtraBold
-        )
     }
 }

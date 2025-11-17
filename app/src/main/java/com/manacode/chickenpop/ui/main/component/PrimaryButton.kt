@@ -75,7 +75,7 @@ private fun PrimaryButton(
         PrimaryVariant.StartGreen -> ButtonParams(
             family = FontFamily.SansSerif,
             weight = FontWeight.ExtraBold,
-            size = 36.sp,
+            size = 40.sp,
             line = 44.sp,
             padH = 44.dp
         )

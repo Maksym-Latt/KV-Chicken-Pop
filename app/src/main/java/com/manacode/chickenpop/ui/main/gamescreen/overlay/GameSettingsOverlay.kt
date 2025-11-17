@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,12 +36,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.manacode.chickenpop.ui.main.component.GradientOutlinedText
 import com.manacode.chickenpop.ui.main.settings.SettingsViewModel
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import com.manacode.chickenpop.ui.main.component.LabeledSlider
 import com.manacode.chickenpop.ui.main.component.SecondaryBackButton
 import com.manacode.chickenpop.ui.main.component.SecondaryIconButton
 
+// ======================== ⏸ PAUSE OVERLAY ========================
 @Composable
 fun GameSettingsOverlay(
     onResume: () -> Unit,
@@ -47,14 +51,21 @@ fun GameSettingsOverlay(
     onHome: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
+    // ----------------------- Colors -----------------------
+    val panelGrad = Brush.horizontalGradient(
+        colors = listOf(
+            Color(0xFF93311C),
+            Color(0xFFB47234),
+            Color(0xFF93311C)
+        )
+    )
+    val cardShape = RoundedCornerShape(18.dp)
+    val borderColor = Color(0xFF2B1A09)
 
-    val orangeTop = Color(0xffffc847)
-    val orangeBot = Color(0xff893c00)
-    val panelGrad = Brush.verticalGradient(listOf(orangeTop, orangeBot))
-    val cardShape = RoundedCornerShape(26.dp)
-
+    // ----------------------- State -----------------------
     val ui by viewModel.ui.collectAsStateWithLifecycle()
 
+    // ----------------------- Overlay -----------------------
     Box(
         Modifier
             .fillMaxSize()
@@ -64,98 +75,88 @@ fun GameSettingsOverlay(
                 indication = null
             ) { onResume() }
     ) {
-        // ----------------------- BACK BUTTON (новое) -----------------------
         SecondaryBackButton(
             onClick = onResume,
             modifier = Modifier
-                .padding(start = 24.dp, top = 24.dp)
-                .size(62.dp)
+                .padding(start = 16.dp, top = 24.dp)
         )
 
-        // ----------------------- Card -----------------------
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
                 .width(300.dp)
                 .wrapContentHeight()
+                .clip(cardShape)
+                .background(panelGrad)                       // было Color(0xFF3DE3F8)
+                .border(2.dp, borderColor, cardShape)        // было Color(0xFF101010)
+                .padding(vertical = 20.dp, horizontal = 16.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {}
         ) {
-            Box(
+            Column(
                 modifier = Modifier
-                    .matchParentSize()
-                    .graphicsLayer { shadowElevation = 18f }
-            )
-
-            Box(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .clip(cardShape)
-                    .background(panelGrad)
-                    .padding(vertical = 22.dp, horizontal = 18.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {}
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                GradientOutlinedText(
+                    text = "Pause",
+                    fontSize = 46.sp,
+                    gradientColors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF)),
+                )
+                Spacer(Modifier.height(12.dp))
 
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                LabeledSlider(
+                    title = "Volume",
+                    value = ui.musicVolume,
+                    onChange = viewModel::setMusicVolume,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                LabeledSlider(
+                    title = "Sound",
+                    value = ui.soundVolume,
+                    onChange = viewModel::setSoundVolume,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                )
+
+                // ----------------------- BOTTOM BUTTONS -----------------------
+                Spacer(Modifier.height(12.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    GradientOutlinedText(
-                        text = "Pause",
-                        fontSize = 40.sp,
-                        gradientColors = listOf(Color.White, Color.White)
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-
-                    LabeledSlider(
-                        title = "Volume",
-                        value = ui.musicVolume,
-                        onChange = viewModel::setMusicVolume,
-                        modifier = Modifier.fillMaxWidth(0.82f)
-                    )
-
-                    Spacer(Modifier.height(10.dp))
-
-                    LabeledSlider(
-                        title = "Sound",
-                        value = ui.soundVolume,
-                        onChange = viewModel::setSoundVolume,
-                        modifier = Modifier.fillMaxWidth(0.82f)
-                    )
-
-                    Spacer(Modifier.height(52.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(18.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    SecondaryIconButton(
+                        onClick = onRetry,
+                        modifier = Modifier.size(64.dp)
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Retry",
+                            tint = Color.White,
+                            modifier = Modifier.fillMaxSize(0.72f)
+                        )
+                    }
 
-                        SecondaryIconButton(
-                            onClick = onRetry,
-                            modifier = Modifier.size(60.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Retry",
-                                tint = Color.White,
-                                modifier = Modifier.fillMaxSize(0.72f)
-                            )
-                        }
-
-                        SecondaryIconButton(
-                            onClick = onHome,
-                            modifier = Modifier.size(56.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Home,
-                                contentDescription = "Home",
-                                tint = Color.White,
-                                modifier = Modifier.fillMaxSize(0.72f)
-                            )
-                        }
+                    SecondaryIconButton(
+                        onClick = onHome,
+                        modifier = Modifier.size(60.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home",
+                            tint = Color.White,
+                            modifier = Modifier.fillMaxSize(0.72f)
+                        )
                     }
                 }
             }

@@ -32,14 +32,14 @@ public fun LabeledSlider(
         ) {
             GradientOutlinedTextShort(
                 text = title,
-                fontSize = 28.sp,
+                fontSize = 22.sp,
                 gradientColors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF)),
             )
             Spacer(Modifier.fillMaxWidth())
 
             GradientOutlinedText(
                 text = "${value}%",
-                fontSize = 28.sp,
+                fontSize = 22.sp,
                 gradientColors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF)),
             )
         }
