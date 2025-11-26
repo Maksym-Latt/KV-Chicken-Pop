@@ -10,11 +10,11 @@ plugins {
 }
 
 android {
-    namespace = "com.manacode.chickenpop"
+    namespace = "com.game.chickenpop"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.manacode.chickenpop"
+        applicationId = "com.game.chickenpop"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
